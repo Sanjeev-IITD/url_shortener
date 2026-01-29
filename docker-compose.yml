@@ -1,0 +1,33 @@
+services:
+  url-shorty:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: url-shorty
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    networks:
+      - nginx_proxy_manager_default
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api-docs" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - ./logs:/usr/src/app/logs
+      - ./uploads:/usr/src/app/uploads
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
+
+networks:
+  nginx_proxy_manager_default:
+    external: true
