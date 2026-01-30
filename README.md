@@ -27,7 +27,6 @@ A comprehensive URL shortening service with advanced analytics, custom aliases, 
 - Google OAuth credentials
 - Docker Desktop (for local testing and deployment)
 
-For detailed testing and deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ## Environment Variables
 
