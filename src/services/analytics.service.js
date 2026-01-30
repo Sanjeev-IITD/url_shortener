@@ -243,7 +243,7 @@ class AnalyticsService {
 
   static async getOverallAnalyticsFromPostgres(userId) {
     const urlsResult = await pool.query(
-      'SELECT id, short_url, original_url, created_at FROM urls WHERE user_id = $1',
+      'SELECT id, short_url, long_url, created_at FROM urls WHERE user_id = $1',
       [userId]
     );
 
@@ -315,13 +315,13 @@ class AnalyticsService {
     const topUrlsResult = await pool.query(
       `SELECT 
         u.short_url as alias,
-        u.original_url as "originalUrl",
+        u.long_url as "originalUrl",
         u.created_at as "createdAt",
         COUNT(a.id) as clicks
       FROM urls u
       LEFT JOIN analytics a ON u.id = a.url_id
       WHERE u.user_id = $1
-      GROUP BY u.id, u.short_url, u.original_url, u.created_at
+      GROUP BY u.id, u.short_url, u.long_url, u.created_at
       ORDER BY clicks DESC
       LIMIT 5`,
       [userId]
