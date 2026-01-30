@@ -523,27 +523,88 @@ a {
 /* Responsive
    ======================================== */
 @media (max-width: 768px) {
-    .hide-mobile {
-        display: none;
+    .nav-wrapper {
+        flex-direction: column;
+        gap: 1rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .menu-links {
+        gap: 1.5rem;
+        font-size: 0.8rem;
     }
 
     .display-1 {
-        font-size: 3.5rem;
+        font-size: 3rem;
+        line-height: 1;
+    }
+
+    .display-2 {
+        font-size: 2.5rem;
+    }
+
+    .section {
+        padding: 5vh 0;
+        min-height: auto;
+    }
+
+    .container {
+        padding: 0 1.5rem;
+    }
+
+    .hero-title {
+        margin-bottom: 3rem;
+    }
+
+    .minimal-form {
+        max-width: 100%;
+    }
+
+    .input-line-group input {
+        font-size: 1.1rem; /* Prevent zoom on iOS */
     }
 
     .stats-overview {
         grid-template-columns: 1fr;
+        gap: 3rem;
     }
 
     .charts-wrap {
         grid-template-columns: 1fr;
+        gap: 3rem;
     }
 
-
+    .chart-box {
+        padding: 1rem;
+    }
 
     .grid-2 {
         grid-template-columns: 1fr;
-        gap: 0;
+        gap: 2rem;
+    }
+
+    .table-minimal {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .footer-inner {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+        text-align: center;
+    }
+
+    .btn-copy {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+
+    .copy-row {
+        flex-direction: column;
+        gap: 0.5rem;
     }
 }
 
