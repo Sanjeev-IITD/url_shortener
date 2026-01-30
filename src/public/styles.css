@@ -371,7 +371,7 @@ a {
 
 .charts-wrap {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
     gap: 2rem;
     margin-bottom: 4rem;
 }
@@ -382,16 +382,18 @@ a {
     border: 1px solid var(--border);
     height: 300px;
     position: relative;
+    overflow: hidden;
 }
 
 .chart-box canvas {
-    max-height: 220px;
+    max-height: 200px !important;
+    width: 100% !important;
 }
 
 .chart-box h3 {
     font-size: 1rem;
     font-weight: 400;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     text-transform: uppercase;
 }
 
