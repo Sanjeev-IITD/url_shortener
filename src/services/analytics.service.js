@@ -8,8 +8,8 @@ class AnalyticsService {
     try {
       const urlResult = await pool.query('SELECT id FROM urls WHERE short_url = $1', [shortUrl]);
       if (!urlResult.rows.length) {
-        throw { 
-          type: 'validation', 
+        throw {
+          type: 'validation',
           message: 'Short URL not found',
           details: 'Cannot track visit for non-existent URL'
         };
@@ -88,8 +88,8 @@ class AnalyticsService {
   static async getAnalyticsFromPostgres(shortUrl) {
     const urlResult = await pool.query('SELECT id FROM urls WHERE short_url = $1', [shortUrl]);
     if (!urlResult.rows.length) {
-      throw { 
-        type: 'validation', 
+      throw {
+        type: 'validation',
         message: 'URL not found',
         details: 'Cannot retrieve analytics for non-existent URL'
       };
@@ -157,15 +157,15 @@ class AnalyticsService {
 
   static async getTopicAnalytics(topic) {
     if (!topic) {
-      throw { 
-        type: 'validation', 
+      throw {
+        type: 'validation',
         message: 'Topic is required',
         details: 'Please provide a valid topic to retrieve analytics'
       };
     }
     return this.getTopicAnalyticsFromPostgres(topic);
   }
-  
+
   static async getTopicAnalyticsFromPostgres(topic) {
     const urlsResult = await pool.query(
       `SELECT id, short_url as "shortUrl"
@@ -175,7 +175,7 @@ class AnalyticsService {
     );
 
     const urlIds = urlsResult.rows.map(row => row.id);
-    
+
     if (!urlIds.length) {
       return {
         totalClicks: 0,
@@ -228,7 +228,7 @@ class AnalyticsService {
     });
 
     const urlStats = await Promise.all(urlStatsPromises);
-    
+
     return {
       totalClicks: parseInt(totalClicksResult.rows[0].total),
       uniqueUsers: parseInt(uniqueUsersResult.rows[0].total),
@@ -240,23 +240,23 @@ class AnalyticsService {
   static async getOverallAnalytics(userId) {
     return this.getOverallAnalyticsFromPostgres(userId);
   }
-  
+
   static async getOverallAnalyticsFromPostgres(userId) {
     const urlsResult = await pool.query(
-      'SELECT id FROM urls WHERE user_id = $1',
+      'SELECT id, short_url, original_url, created_at FROM urls WHERE user_id = $1',
       [userId]
     );
 
     const urlIds = urlsResult.rows.map(row => row.id);
-    
+
     if (!urlIds.length) {
       return {
         totalUrls: 0,
         totalClicks: 0,
-        uniqueUsers: 0,
-        clicksByDate: [],
-        osType: [],
-        deviceType: []
+        uniqueLocations: 0,
+        clicksOverTime: [],
+        deviceTypes: { desktop: 0, mobile: 0, tablet: 0, other: 0 },
+        topUrls: []
       };
     }
 
@@ -266,56 +266,79 @@ class AnalyticsService {
       [urlIds]
     );
 
-    // Get unique users
-    const uniqueUsersResult = await pool.query(
-      'SELECT COUNT(DISTINCT visitor_ip) as total FROM analytics WHERE url_id = ANY($1)',
+    // Get unique locations (countries)
+    const uniqueLocationsResult = await pool.query(
+      'SELECT COUNT(DISTINCT country) as total FROM analytics WHERE url_id = ANY($1) AND country IS NOT NULL AND country != \'\'',
       [urlIds]
     );
 
-    // Get clicks by date
+    // Get clicks by date (formatted for frontend as clicksOverTime with count field)
     const clicksByDateResult = await pool.query(
       `SELECT 
-        DATE(visited_at) as date,
-        COUNT(*) as clicks
+        TO_CHAR(DATE(visited_at), 'Mon DD') as date,
+        COUNT(*) as count
       FROM analytics 
       WHERE url_id = ANY($1)
         AND visited_at >= CURRENT_DATE - INTERVAL '7 days'
       GROUP BY DATE(visited_at)
-      ORDER BY date DESC`,
+      ORDER BY DATE(visited_at) ASC`,
       [urlIds]
     );
 
-    // Get OS statistics
-    const osStatsResult = await pool.query(
-      `SELECT 
-        os_type as "osName",
-        COUNT(*) as "uniqueClicks",
-        COUNT(DISTINCT visitor_ip) as "uniqueUsers"
-      FROM analytics 
-      WHERE url_id = ANY($1)
-      GROUP BY os_type`,
-      [urlIds]
-    );
-
-    // Get device type statistics
+    // Get device type statistics and convert to object format
     const deviceStatsResult = await pool.query(
       `SELECT 
-        device_type as "deviceName",
-        COUNT(*) as "uniqueClicks",
-        COUNT(DISTINCT visitor_ip) as "uniqueUsers"
+        LOWER(COALESCE(NULLIF(device_type, ''), 'desktop')) as device,
+        COUNT(*) as count
       FROM analytics 
       WHERE url_id = ANY($1)
-      GROUP BY device_type`,
+      GROUP BY LOWER(COALESCE(NULLIF(device_type, ''), 'desktop'))`,
       [urlIds]
+    );
+
+    // Convert device stats array to object
+    const deviceTypes = { desktop: 0, mobile: 0, tablet: 0, other: 0 };
+    deviceStatsResult.rows.forEach(row => {
+      const device = row.device.toLowerCase();
+      if (device === 'desktop' || device === '') {
+        deviceTypes.desktop += parseInt(row.count);
+      } else if (device === 'mobile') {
+        deviceTypes.mobile += parseInt(row.count);
+      } else if (device === 'tablet') {
+        deviceTypes.tablet += parseInt(row.count);
+      } else {
+        deviceTypes.other += parseInt(row.count);
+      }
+    });
+
+    // Get top 5 URLs with clicks count
+    const topUrlsResult = await pool.query(
+      `SELECT 
+        u.short_url as alias,
+        u.original_url as "originalUrl",
+        u.created_at as "createdAt",
+        COUNT(a.id) as clicks
+      FROM urls u
+      LEFT JOIN analytics a ON u.id = a.url_id
+      WHERE u.user_id = $1
+      GROUP BY u.id, u.short_url, u.original_url, u.created_at
+      ORDER BY clicks DESC
+      LIMIT 5`,
+      [userId]
     );
 
     return {
       totalUrls: urlIds.length,
       totalClicks: parseInt(totalClicksResult.rows[0].total),
-      uniqueUsers: parseInt(uniqueUsersResult.rows[0].total),
-      clicksByDate: clicksByDateResult.rows,
-      osType: osStatsResult.rows,
-      deviceType: deviceStatsResult.rows
+      uniqueLocations: parseInt(uniqueLocationsResult.rows[0].total) || 0,
+      clicksOverTime: clicksByDateResult.rows.map(r => ({ date: r.date, count: parseInt(r.count) })),
+      deviceTypes: deviceTypes,
+      topUrls: topUrlsResult.rows.map(r => ({
+        alias: r.alias,
+        originalUrl: r.originalUrl,
+        createdAt: r.createdAt,
+        clicks: parseInt(r.clicks)
+      }))
     };
   }
 }
