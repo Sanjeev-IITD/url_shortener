@@ -61,7 +61,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('trust proxy', 1);
 app.use(cors());
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://accounts.google.com"]
+    }
+  }
+}));
+
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Setup request logging
 app.use(morgan('combined', { stream }));
@@ -149,13 +163,9 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Root endpoint - basic health check
+// Root endpoint - serve frontend
 app.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'URL Shortener API is running',
-    docs: '/api-docs',
-    health: '/health'
-  });
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Swagger documentation

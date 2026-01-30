@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Advanced URL Shortener with Analytics and Rate Limiting">
+    <title>URL Shortener - Shorten, Test & Analyze</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        </svg>
+                    </div>
+                    <span class="logo-text">URL Shortener</span>
+                </div>
+                <div class="auth-section">
+                    <div id="auth-loading" class="auth-loading">
+                        <div class="spinner"></div>
+                    </div>
+                    <div id="auth-logged-out" class="auth-status hidden">
+                        <button id="login-btn" class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                                <polyline points="10 17 15 12 10 7"></polyline>
+                                <line x1="15" y1="12" x2="3" y2="12"></line>
+                            </svg>
+                            Login with Google
+                        </button>
+                    </div>
+                    <div id="auth-logged-in" class="auth-status hidden">
+                        <div class="user-info">
+                            <img id="user-avatar" src="" alt="User" class="user-avatar">
+                            <span id="user-name" class="user-name"></span>
+                        </div>
+                        <button id="logout-btn" class="btn btn-secondary">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs-nav">
+            <button class="tab-btn active" data-tab="shorten">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+                Shorten URL
+            </button>
+            <button class="tab-btn" data-tab="test">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                Test Mode
+            </button>
+            <button class="tab-btn" data-tab="analytics">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+                Analytics
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Shorten URL Tab -->
+            <section id="shorten-tab" class="tab-content active">
+                <div class="shorten-container">
+                    <div class="shorten-hero">
+                        <h1>Shorten Your Links</h1>
+                        <p>Create short, memorable links with powerful analytics</p>
+                    </div>
+                    
+                    <form id="shorten-form" class="shorten-form">
+                        <div class="input-group main-input">
+                            <label for="long-url">Enter your long URL</label>
+                            <input type="url" id="long-url" placeholder="https://example.com/your-very-long-url-here..." required>
+                        </div>
+                        
+                        <div class="options-toggle">
+                            <button type="button" id="toggle-options" class="btn btn-ghost">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                </svg>
+                                Advanced Options
+                            </button>
+                        </div>
+                        
+                        <div id="advanced-options" class="advanced-options hidden">
+                            <div class="options-grid">
+                                <div class="input-group">
+                                    <label for="custom-alias">Custom Alias (optional)</label>
+                                    <input type="text" id="custom-alias" placeholder="my-custom-link" pattern="[a-zA-Z0-9-_]+" title="Only letters, numbers, hyphens and underscores">
+                                </div>
+                                <div class="input-group">
+                                    <label for="topic">Topic/Category (optional)</label>
+                                    <input type="text" id="topic" placeholder="marketing, social, etc.">
+                                </div>
+                                <div class="input-group">
+                                    <label for="expiration">Expiration</label>
+                                    <select id="expiration">
+                                        <option value="">Never</option>
+                                        <option value="1h">1 Hour</option>
+                                        <option value="24h">24 Hours</option>
+                                        <option value="7d">7 Days</option>
+                                        <option value="30d">30 Days</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" id="shorten-btn" class="btn btn-primary btn-large">
+                            <span class="btn-text">Shorten URL</span>
+                            <div class="btn-loader hidden">
+                                <div class="spinner"></div>
+                            </div>
+                        </button>
+                    </form>
+                    
+                    <div id="result-container" class="result-container hidden">
+                        <div class="result-card">
+                            <div class="result-header">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                <span>URL Shortened Successfully!</span>
+                            </div>
+                            <div class="result-url-group">
+                                <input type="text" id="short-url" readonly>
+                                <button type="button" id="copy-btn" class="btn btn-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                    Copy
+                                </button>
+                            </div>
+                            <div class="result-details">
+                                <span class="original-url" id="original-url"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Test Mode Tab -->
+            <section id="test-tab" class="tab-content">
+                <div class="test-container">
+                    <div class="test-header">
+                        <h2>API Test Console</h2>
+                        <p>Test all API endpoints interactively</p>
+                    </div>
+                    
+                    <div class="test-layout">
+                        <div class="test-sidebar">
+                            <h3>Endpoints</h3>
+                            <div class="endpoint-list">
+                                <div class="endpoint-category">
+                                    <h4>Authentication</h4>
+                                    <button class="endpoint-btn" data-method="GET" data-path="/auth/google">
+                                        <span class="method-badge get">GET</span>
+                                        /auth/google
+                                    </button>
+                                    <button class="endpoint-btn" data-method="GET" data-path="/auth/current-auth">
+                                        <span class="method-badge get">GET</span>
+                                        /auth/current-auth
+                                    </button>
+                                    <button class="endpoint-btn" data-method="GET" data-path="/auth/logout">
+                                        <span class="method-badge get">GET</span>
+                                        /auth/logout
+                                    </button>
+                                </div>
+                                <div class="endpoint-category">
+                                    <h4>URLs</h4>
+                                    <button class="endpoint-btn" data-method="POST" data-path="/api/shorten">
+                                        <span class="method-badge post">POST</span>
+                                        /api/shorten
+                                    </button>
+                                    <button class="endpoint-btn" data-method="GET" data-path="/api/shorten/{alias}">
+                                        <span class="method-badge get">GET</span>
+                                        /api/shorten/{alias}
+                                    </button>
+                                </div>
+                                <div class="endpoint-category">
+                                    <h4>Analytics</h4>
+                                    <button class="endpoint-btn" data-method="GET" data-path="/api/analytics/{alias}">
+                                        <span class="method-badge get">GET</span>
+                                        /api/analytics/{alias}
+                                    </button>
+                                    <button class="endpoint-btn" data-method="GET" data-path="/api/analytics/topic/{topic}">
+                                        <span class="method-badge get">GET</span>
+                                        /api/analytics/topic/{topic}
+                                    </button>
+                                    <button class="endpoint-btn" data-method="GET" data-path="/api/analytics/overall">
+                                        <span class="method-badge get">GET</span>
+                                        /api/analytics/overall
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="test-main">
+                            <div class="request-builder">
+                                <div class="request-header">
+                                    <span id="selected-method" class="method-badge get">GET</span>
+                                    <input type="text" id="request-url" value="/health" class="request-url-input">
+                                    <button id="send-request-btn" class="btn btn-primary">Send</button>
+                                </div>
+                                
+                                <div class="request-body-section">
+                                    <h4>Request Body (JSON)</h4>
+                                    <textarea id="request-body" placeholder='{"url": "https://example.com"}'></textarea>
+                                </div>
+                                
+                                <div class="response-section">
+                                    <div class="response-header">
+                                        <h4>Response</h4>
+                                        <span id="response-status" class="status-badge"></span>
+                                        <span id="response-time" class="response-time"></span>
+                                    </div>
+                                    <pre id="response-body" class="response-body">Click "Send" to make a request...</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Tab -->
+            <section id="analytics-tab" class="tab-content">
+                <div class="analytics-container">
+                    <div class="analytics-header">
+                        <h2>Analytics Dashboard</h2>
+                        <button id="refresh-analytics" class="btn btn-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <polyline points="1 20 1 14 7 14"></polyline>
+                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-value" id="total-urls">--</span>
+                                <span class="stat-label">Total URLs</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon clicks">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-value" id="total-clicks">--</span>
+                                <span class="stat-label">Total Clicks</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon locations">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-value" id="unique-locations">--</span>
+                                <span class="stat-label">Unique Locations</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>Clicks Over Time</h3>
+                            <canvas id="clicks-chart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Device Types</h3>
+                            <canvas id="devices-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="top-urls-section">
+                        <h3>Top Performing URLs</h3>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Short URL</th>
+                                        <th>Original URL</th>
+                                        <th>Clicks</th>
+                                        <th>Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top-urls-body">
+                                    <tr>
+                                        <td colspan="4" class="empty-state">No data available. Create some short URLs first!</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container" class="toast-container"></div>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>
