@@ -575,6 +575,7 @@ a {
 @media (max-width: 768px) {
     .mobile-menu-btn {
         display: block;
+        margin-left: 1rem;
     }
 
     .nav-wrapper {
@@ -582,7 +583,18 @@ a {
         align-items: center;
         padding-bottom: 0;
         flex-direction: row;
-        /* reset to row */
+        width: 100%;
+        display: flex;
+        /* Ensure flex behavior */
+    }
+
+    .auth-section {
+        margin-left: auto;
+        margin-right: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 0.8rem;
     }
 
     .nav-content {
@@ -599,7 +611,6 @@ a {
         gap: 3rem;
         z-index: 999;
 
-        /* Animation states */
         opacity: 0;
         pointer-events: none;
         transform: translateY(-20px);
@@ -620,24 +631,14 @@ a {
 
     .menu-link {
         font-size: 2rem;
-        /* Big Fonts */
     }
 
-    .auth-section {
-        flex-direction: column;
-        align-items: center;
+    /* Fix Content Overlap - Increase Top Padding */
+    .hero-section {
+        padding-top: 15vh !important;
     }
 
-    /* Keep generic mobile adjustments */
-    .display-1 {
-        font-size: 3rem;
-        line-height: 1;
-    }
-
-    .display-2 {
-        font-size: 2.5rem;
-    }
-
+    /* General section padding for others */
     .section {
         padding: 5vh 0;
         min-height: auto;
