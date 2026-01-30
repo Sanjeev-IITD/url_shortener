@@ -285,7 +285,11 @@ function initCharts() {
         },
         scales: {
             x: { grid: { display: false }, ticks: { font: { family: 'Inter' } } },
-            y: { grid: { color: '#eee' }, ticks: { font: { family: 'Inter' } } }
+            y: {
+                beginAtZero: true,
+                grid: { color: '#eee' },
+                ticks: { font: { family: 'Inter' } }
+            }
         }
     };
 

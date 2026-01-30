@@ -274,14 +274,20 @@ class AnalyticsService {
 
     // Get clicks by date (formatted for frontend as clicksOverTime with count field)
     const clicksByDateResult = await pool.query(
-      `SELECT 
-        TO_CHAR(DATE(visited_at), 'Mon DD') as date,
-        COUNT(*) as count
-      FROM analytics 
-      WHERE url_id = ANY($1)
-        AND visited_at >= CURRENT_DATE - INTERVAL '7 days'
-      GROUP BY DATE(visited_at)
-      ORDER BY DATE(visited_at) ASC`,
+      `WITH date_series AS (
+        SELECT generate_series(
+          CURRENT_DATE - INTERVAL '6 days',
+          CURRENT_DATE,
+          '1 day'::interval
+        )::date AS date
+      )
+      SELECT 
+        TO_CHAR(d.date, 'Mon DD') as date,
+        COALESCE(COUNT(a.id), 0) as count
+      FROM date_series d
+      LEFT JOIN analytics a ON DATE(a.visited_at) = d.date AND a.url_id = ANY($1)
+      GROUP BY d.date
+      ORDER BY d.date ASC`,
       [urlIds]
     );
 
