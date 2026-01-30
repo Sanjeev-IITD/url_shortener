@@ -140,6 +140,24 @@ setupPassport();
 // Apply rate limiting to all API routes
 // app.use('/api/', apiLimiter);
 
+// Health check endpoint - responds immediately for Render/Docker health checks
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV
+  });
+});
+
+// Root endpoint - basic health check
+app.get('/', (req, res) => {
+  res.status(200).json({
+    message: 'URL Shortener API is running',
+    docs: '/api-docs',
+    health: '/health'
+  });
+});
+
 // Swagger documentation
 const swaggerDocument = YAML.load(path.join(__dirname, 'docs/swagger.yaml'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
