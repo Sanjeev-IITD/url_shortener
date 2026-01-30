@@ -14,6 +14,8 @@ const elements = {
     loginBtn: document.getElementById('login-btn'),
     logoutBtn: document.getElementById('logout-btn'),
     userName: document.getElementById('user-name'),
+    userInitialBtn: document.getElementById('user-initial-btn'),
+    menuLogoutBtn: document.getElementById('menu-logout-btn'),
 
     // Shorten Form (home page only)
     shortenForm: document.getElementById('shorten-form'),
@@ -64,24 +66,62 @@ document.addEventListener('DOMContentLoaded', () => {
 function initMobileMenu() {
     const mobileBtn = document.getElementById('mobile-menu-btn');
     const navContent = document.getElementById('nav-content');
-    const menuLinks = document.querySelectorAll('.menu-link');
+    const menuLinks = document.querySelectorAll('.nav-content .menu-link');
+    const userInitialBtn = document.getElementById('user-initial-btn');
+    const menuLogoutBtn = document.getElementById('menu-logout-btn');
 
     if (!mobileBtn || !navContent) return;
 
-    mobileBtn.addEventListener('click', () => {
-        mobileBtn.classList.toggle('active');
-        navContent.classList.toggle('active');
-        document.body.style.overflow = navContent.classList.contains('active') ? 'hidden' : '';
-    });
+    const toggleMenu = (forceState) => {
+        const shouldOpen = forceState !== undefined ? forceState : !navContent.classList.contains('active');
 
-    // Close menu when link is clicked
-    menuLinks.forEach(link => {
-        link.addEventListener('click', () => {
+        if (shouldOpen) {
+            mobileBtn.classList.add('active');
+            navContent.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        } else {
             mobileBtn.classList.remove('active');
             navContent.classList.remove('active');
             document.body.style.overflow = '';
+        }
+    };
+
+    mobileBtn.addEventListener('click', () => toggleMenu());
+
+    // User initial button opens menu on mobile
+    if (userInitialBtn) {
+        userInitialBtn.addEventListener('click', () => {
+            // Only toggle on mobile (when mobile menu is visible)
+            if (window.innerWidth <= 768) {
+                toggleMenu(true);
+            }
         });
+    }
+
+    // Close menu when link is clicked
+    menuLinks.forEach(link => {
+        link.addEventListener('click', () => toggleMenu(false));
     });
+
+    // Menu logout button
+    if (menuLogoutBtn) {
+        menuLogoutBtn.addEventListener('click', async () => {
+            toggleMenu(false);
+            try {
+                await fetch(`${API_BASE}/auth/logout`, {
+                    credentials: 'include'
+                });
+                currentUser = null;
+                showLoggedOutState();
+                // Hide menu logout button
+                menuLogoutBtn.classList.add('hidden');
+                showToast('Logged out');
+            } catch (error) {
+                console.error('Logout failed:', error);
+                showToast('Logout failed', 'error');
+            }
+        });
+    }
 }
 
 function initVisuals() {
@@ -174,8 +214,20 @@ function showLoggedInState() {
     elements.authLoggedOut?.classList.add('hidden');
     elements.authLoggedIn?.classList.remove('hidden');
 
-    if (currentUser && elements.userName) {
-        elements.userName.textContent = currentUser.name || currentUser.email || 'User';
+    if (currentUser) {
+        const displayName = currentUser.name || currentUser.email || 'User';
+        if (elements.userName) {
+            elements.userName.textContent = displayName;
+        }
+        // Set user initial for mobile button
+        if (elements.userInitialBtn) {
+            const initial = displayName.charAt(0).toUpperCase();
+            elements.userInitialBtn.textContent = initial;
+        }
+        // Show logout button in mobile menu
+        if (elements.menuLogoutBtn) {
+            elements.menuLogoutBtn.classList.remove('hidden');
+        }
     }
 }
 

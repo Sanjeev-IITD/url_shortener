@@ -28,20 +28,25 @@
                 <div class="logo">
                     <a href="/" class="logo-link">
                         <span class="font-playfair">Shortener</span>
-                        <span class="version">Vol.1</span>
                     </a>
+                </div>
+
+                <div class="menu-links desktop-menu">
+                    <a href="/" class="menu-link active">Shorten</a>
+                    <a href="/analytics.html" class="menu-link">Analytics</a>
                 </div>
 
                 <div class="auth-section">
                     <div id="auth-loading" class="auth-loading hidden">
-                        <span>Loading...</span>
+                        <span>...</span>
                     </div>
                     <div id="auth-logged-out" class="auth-status hidden">
                         <button id="login-btn" class="btn-text">Login</button>
                     </div>
                     <div id="auth-logged-in" class="auth-status hidden">
-                        <span id="user-name" class="user-name"></span>
-                        <button id="logout-btn" class="btn-text">Logout</button>
+                        <button id="user-initial-btn" class="user-initial-btn"></button>
+                        <span id="user-name" class="user-name desktop-only"></span>
+                        <button id="logout-btn" class="btn-text desktop-only">Logout</button>
                     </div>
                 </div>
 
@@ -55,6 +60,7 @@
                         <a href="/" class="menu-link active">Shorten</a>
                         <a href="/analytics.html" class="menu-link">Analytics</a>
                     </div>
+                    <button id="menu-logout-btn" class="btn-text menu-logout-btn hidden">Logout</button>
                 </div>
             </div>
         </nav>
