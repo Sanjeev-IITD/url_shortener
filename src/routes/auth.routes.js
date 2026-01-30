@@ -16,7 +16,7 @@ router.get('/google',
 
 // Google OAuth callback route
 router.get('/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
+  passport.authenticate('google', { failureRedirect: '/?error=auth_failed' }),
   async (req, res) => {
     try {
       logger.info('Google callback received:', {
@@ -32,6 +32,7 @@ router.get('/google/callback',
 
       // Store auth data in session for later use
       req.session.authData = {
+        authenticated: true,
         accessToken,
         refreshToken,
         user: {
@@ -42,19 +43,8 @@ router.get('/google/callback',
         }
       };
 
-      // Return JSON with the access token (for API testing)
-      res.json({
-        message: 'Login successful!',
-        accessToken,
-        refreshToken,
-        user: {
-          id: user.google_id,
-          email: user.email,
-          name: user.name,
-          avatar: user.avatar
-        },
-        instructions: 'Copy the accessToken above and use it in the Authorization header as: Bearer <token>'
-      });
+      // Redirect to frontend after successful login
+      res.redirect('/');
     } catch (error) {
       logger.error('Authentication error:', {
         error: error.message,
@@ -62,23 +52,36 @@ router.get('/google/callback',
         user: req.user
       });
 
-      res.status(500).json({
-        error: 'Authentication Error',
-        message: error.message || 'Failed to authenticate with Google'
-      });
+      res.redirect('/?error=auth_failed');
     }
   }
 );
 
 // New endpoint to get stored auth data
 router.get('/current-auth', (req, res) => {
-  if (!req.session.authData) {
-    return res.status(401).json({
-      error: 'No authentication data',
-      message: 'Please login first'
+  // Check session auth data first
+  if (req.session && req.session.authData) {
+    return res.json(req.session.authData);
+  }
+
+  // Check passport session (req.user)
+  if (req.user) {
+    return res.json({
+      authenticated: true,
+      user: {
+        id: req.user.google_id,
+        email: req.user.email,
+        name: req.user.name,
+        avatar: req.user.avatar
+      }
     });
   }
-  res.json(req.session.authData);
+
+  // Not authenticated
+  res.json({
+    authenticated: false,
+    message: 'Please login first'
+  });
 });
 
 // Logout route
