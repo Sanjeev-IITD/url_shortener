@@ -1,397 +1,356 @@
-# Advanced URL Shortener with Analytics
+# URL Shortener
 
-A comprehensive URL shortening service with advanced analytics, custom aliases, and rate limiting capabilities. Built with Node.js, Express, PostgreSQL, and Redis.
+A professional URL shortening service with comprehensive analytics, user authentication, and a modern interface. Built with Node.js, Express, PostgreSQL, and Redis.
+
+**Live Demo**: [https://url-shortener-65ru.onrender.com](https://url-shortener-65ru.onrender.com)
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [API Reference](#api-reference)
+- [Database Schema](#database-schema)
+- [Deployment](#deployment)
+- [License](#license)
+
+---
 
 ## Features
 
-- **User Authentication**: Secure login via Google OAuth
-- **URL Shortening**: Create short URLs with optional custom aliases
-- **Topic-based Organization**: Group URLs under specific topics (e.g., acquisition, activation, retention)
-- **Advanced Analytics**:
-  - Total clicks and unique visitors
-  - Click statistics by date (last 7 days)
-  - OS and device type analytics
-  - Topic-based analytics
-  - Overall user analytics
-- **Rate Limiting**: Prevent abuse of the API
-- **Caching**: Redis-based caching for improved performance
-- **API Documentation**: Swagger/OpenAPI documentation
-- **Containerization**: Docker support for easy deployment
-- **CI/CD**: Continuous Integration/Continuous Deployment via GitHub Actions
+### Core Functionality
 
-## Prerequisites
+- **URL Shortening**: Convert long URLs into concise, shareable links
+- **Custom Aliases**: Create memorable custom short codes
+- **Topic Organization**: Categorize URLs by topic for better management
 
-- Node.js (v20 or later)
-- PostgreSQL (hosted on VPS or cloud)
-- Redis (hosted on VPS or cloud)
+### Analytics Dashboard
+
+- **Performance Metrics**: Track total URLs, clicks, and unique locations
+- **Time-Series Analytics**: View click trends over the last 7 days
+- **Device Breakdown**: Analyze traffic by device type (Desktop, Mobile, Tablet)
+- **Top Links**: See your most clicked shortened URLs
+
+### Security and Authentication
+
+- **Google OAuth**: Secure authentication via Google accounts
+- **Session Management**: Redis-backed sessions for reliability
+- **Rate Limiting**: Token bucket algorithm prevents API abuse
+- **JWT Tokens**: Secure API access with JSON Web Tokens
+
+### Performance
+
+- **Redis Caching**: URL lookups cached for fast redirects
+- **Connection Pooling**: Efficient database connections
+- **Optimized Queries**: Indexed database for quick analytics
+
+---
+
+## Architecture
+
+```
+                                    +------------------+
+                                    |   Google OAuth   |
+                                    +--------+---------+
+                                             |
+                                             v
++-------------+       HTTPS        +-------------------+
+|   Client    | <----------------> |   Node.js API     |
+|  (Browser)  |                    |   (Express.js)    |
++-------------+                    +--------+----------+
+                                            |
+                          +-----------------+-----------------+
+                          |                                   |
+                          v                                   v
+                 +------------------+               +------------------+
+                 |   PostgreSQL     |               |     Redis        |
+                 |   (Neon Cloud)   |               |   (Upstash)      |
+                 +------------------+               +------------------+
+                 | - Users          |               | - Session Store  |
+                 | - URLs           |               | - URL Cache      |
+                 | - Analytics      |               | - Rate Limiting  |
+                 +------------------+               +------------------+
+```
+
+### Data Flow
+
+1. **User Authentication**: Client initiates Google OAuth flow, server validates and creates session
+2. **URL Creation**: Authenticated user submits long URL, server generates short code and stores mapping
+3. **URL Redirect**: Visitor accesses short URL, server retrieves original URL from cache/database and redirects
+4. **Analytics Tracking**: Each redirect logs visitor data (IP, device, location) for analytics
+
+---
+
+## Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| **Runtime** | Node.js v20 |
+| **Framework** | Express.js |
+| **Database** | PostgreSQL (Neon) |
+| **Cache/Sessions** | Redis (Upstash) |
+| **Authentication** | Passport.js, Google OAuth 2.0 |
+| **Security** | Helmet, CORS, Rate Limiting |
+| **API Documentation** | Swagger/OpenAPI |
+| **Deployment** | Render, Docker |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js v20 or later
+- PostgreSQL database
+- Redis instance
 - Google OAuth credentials
-- Docker Desktop (for local testing and deployment)
 
+### Installation
 
-## Environment Variables
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Sanjeev-IITD/url_shortener.git
+   cd url_shortener
+   ```
 
-Create a `.env` file in the root directory with the following variables:
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-```env
-# Server Configuration
-PORT=3000
-NODE_ENV=development
+3. Configure environment variables (see below)
 
-# Database Configuration
-POSTGRES_HOST=your_postgres_host
-POSTGRES_PORT=5432
-POSTGRES_DB=url_shorty
-POSTGRES_USER=your_postgres_user
-POSTGRES_PASSWORD=your_postgres_password
-
-# Redis Configuration
-REDIS_HOST=your_redis_host
-REDIS_PORT=6379
-REDIS_PASSWORD=your_redis_password
-
-# Google OAuth Configuration
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
-
-# Session Configuration
-SESSION_SECRET=your_session_secret
-
-# Rate Limiting
-RATE_LIMIT_WINDOW_MS=900000  # 15 minutes
-RATE_LIMIT_MAX_REQUESTS=100
-
-# URL Configuration
-BASE_URL=http://localhost:3000
-PROD_URL=https://your-production-domain.com  # Production URL for redirects in production environment
-```
-
-## Database Setup
-
-1. Create a PostgreSQL database:
-```sql
-CREATE DATABASE url_shorty;
-```
-
-2. Run the database migrations using one of the following methods:
-
-   a. Using the provided init-db script:
+4. Initialize the database:
    ```bash
    npm run init-db
    ```
 
-   b. Manually with SQL file:
+5. Start the server:
    ```bash
-   psql -U your_postgres_user -d url_shorty -f src/db/schema.sql
+   npm start
    ```
 
-## Data Model
+   For development with auto-reload:
+   ```bash
+   npm run dev
+   ```
 
-The application uses the following data model:
+---
 
-### Database Schema
+## Environment Variables
 
-```
-Table Users {
-  id int [pk]
-  google_id varchar
-  email varchar
-  name varchar
-  picture varchar
-  created_at timestamp
-  updated_at timestamp
-}
+Create a `.env` file in the root directory:
 
-Table URLs {
-  id int [pk]
-  user_id int [ref: > Users.id]
-  original_url varchar
-  short_code varchar
-  topic varchar
-  created_at timestamp
-  updated_at timestamp
-  expiration_date timestamp
-}
+```env
+# Server
+PORT=3000
+NODE_ENV=development
 
-Table Clicks {
-  id int [pk]
-  url_id int [ref: > URLs.id]
-  timestamp timestamp
-  ip_address varchar
-  user_agent varchar
-  referrer varchar
-  country varchar
-  device_type varchar
-  browser varchar
-  os varchar
-}
+# Database (PostgreSQL)
+DATABASE_URL=postgresql://user:password@host:5432/database
 
-Table Topics {
-  id int [pk]
-  name varchar
-  description text
-  created_at timestamp
-  updated_at timestamp
-}
+# Redis
+REDIS_URL=redis://user:password@host:port
 
-Table URL_Analytics {
-  url_id int [pk, ref: - URLs.id]
-  total_clicks int
-  unique_visitors int
-  last_accessed timestamp
-}
+# Google OAuth
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+
+# Session
+SESSION_SECRET=your_secure_secret
+
+# URLs
+BASE_URL=http://localhost:3000
+PROD_URL=https://your-production-domain.com
 ```
 
-> Note: View the database diagram at [dbdiagram.io](https://dbdiagram.io/d/Url-Shortener-Alter-Office-67bd8328263d6cf9a05cd8d4).
+---
 
-### Table Descriptions
+## API Reference
 
-1. **Users**: Stores user information from Google OAuth authentication.
-   - Primary key: `id` (auto-incremented)
-   - Unique identifier: `google_id` (from Google OAuth)
-   - User data: `email`, `name`, `picture`
-   - Timestamps: `created_at`, `updated_at`
+### Authentication
 
-2. **URLs**: Stores the mapping between original URLs and their shortened versions.
-   - Primary key: `id` (auto-incremented)
-   - Foreign key: `user_id` (references Users.id)
-   - URL data: `original_url`, `short_code`, `topic`
-   - Timestamps: `created_at`, `updated_at`, `expiration_date`
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/auth/google` | Initiate Google OAuth login |
+| GET | `/auth/google/callback` | OAuth callback handler |
+| GET | `/auth/current-auth` | Get current authentication status |
+| GET | `/auth/logout` | Logout and clear session |
 
-3. **Clicks**: Records each click/visit to a shortened URL.
-   - Primary key: `id` (auto-incremented)
-   - Foreign key: `url_id` (references URLs.id)
-   - Click data: `timestamp`, `ip_address`, `user_agent`, `referrer`
-   - Analytics data: `country`, `device_type`, `browser`, `os`
+### URL Operations
 
-4. **Topics**: Categorizes URLs for organizational purposes.
-   - Primary key: `id` (auto-incremented)
-   - Topic data: `name`, `description`
-   - Timestamps: `created_at`, `updated_at`
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/shorten` | Create a short URL | Yes |
+| GET | `/api/shorten/:alias` | Redirect to original URL | No |
 
-5. **URL_Analytics**: Aggregated analytics data for each URL.
-   - Foreign key: `url_id` (references URLs.id)
-   - Analytics data: `total_clicks`, `unique_visitors`, `last_accessed`
+**Create Short URL Request Body:**
+```json
+{
+  "longUrl": "https://example.com/very/long/url",
+  "customAlias": "my-link",
+  "topic": "marketing"
+}
+```
 
-### Key Relationships
+### Analytics
 
-- A User can create multiple URLs (one-to-many)
-- A URL belongs to a single User (many-to-one)
-- A URL can be optionally categorized under a Topic (many-to-one)
-- A URL has many Clicks (one-to-many)
-- Each URL has aggregated analytics (one-to-one)
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/analytics/overall` | Get overall user analytics | Yes |
+| GET | `/api/analytics/:alias` | Get analytics for specific URL | Yes |
+| GET | `/api/analytics/topic/:topic` | Get analytics by topic | Yes |
 
-## Installation
+**Overall Analytics Response:**
+```json
+{
+  "totalUrls": 10,
+  "totalClicks": 250,
+  "uniqueLocations": 5,
+  "clicksOverTime": [
+    { "date": "Jan 24", "count": 30 },
+    { "date": "Jan 25", "count": 45 }
+  ],
+  "deviceTypes": {
+    "desktop": 150,
+    "mobile": 80,
+    "tablet": 15,
+    "other": 5
+  },
+  "topUrls": [
+    {
+      "alias": "abc123",
+      "originalUrl": "https://example.com",
+      "clicks": 50,
+      "createdAt": "2026-01-20T10:30:00Z"
+    }
+  ]
+}
+```
 
-1. Install dependencies:
+---
+
+## Database Schema
+
+```sql
+-- Users: Stores authenticated users
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    google_id VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    avatar VARCHAR(255),
+    last_login TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- URLs: Stores shortened URL mappings
+CREATE TABLE urls (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR(255) REFERENCES users(google_id),
+    long_url TEXT NOT NULL,
+    short_url VARCHAR(15) UNIQUE,
+    topic VARCHAR(50),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_accessed TIMESTAMP WITH TIME ZONE
+);
+
+-- Analytics: Tracks each URL visit
+CREATE TABLE analytics (
+    id SERIAL PRIMARY KEY,
+    url_id INTEGER REFERENCES urls(id),
+    visitor_ip VARCHAR(45),
+    user_agent TEXT,
+    device_type VARCHAR(50),
+    os_type VARCHAR(50),
+    browser VARCHAR(50),
+    country VARCHAR(2),
+    city VARCHAR(100),
+    visited_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Entity Relationships
+
+- A **User** can create multiple **URLs** (one-to-many)
+- Each **URL** can have multiple **Analytics** entries (one-to-many)
+- URLs are optionally grouped by **Topic**
+
+---
+
+## Deployment
+
+### Render (Recommended)
+
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Set the build command: `npm install`
+4. Set the start command: `npm start`
+5. Add all environment variables in the Environment section
+6. Deploy
+
+### Docker
+
+Build and run with Docker:
+
 ```bash
-npm install
+docker build -t url-shortener .
+docker run -p 3000:3000 --env-file .env url-shortener
 ```
 
-2. Start the server:
-```bash
-npm start
-```
+Or use Docker Compose:
 
-For development:
-```bash
-npm run dev
-```
-
-## Docker Deployment
-
-### Using Docker Compose (Recommended)
-
-1. Make sure you have Docker and Docker Compose installed on your system.
-
-2. Create necessary directories for persistent data:
-```bash
-mkdir -p logs uploads
-```
-
-3. Start the application:
 ```bash
 docker-compose up -d
 ```
 
-4. View logs:
-```bash
-docker-compose logs -f
-```
-
-5. Stop the application:
-```bash
-docker-compose down
-```
-
-### Using Docker Directly
-
-1. Build the Docker image:
-```bash
-docker build -t url-shorty .
-```
-
-2. Run the container:
-```bash
-docker run -p 3000:3000 --env-file .env url-shorty
-```
-
-## CI/CD Setup
-
-This project uses GitHub Actions for Continuous Integration and Continuous Deployment to automatically deploy changes to the VPS when code is merged to the main branch.
-
-### GitHub Secrets Required
-
-Set up the following secrets in your GitHub repository settings:
-
-- `DOCKERHUB_USERNAME`: Your Docker Hub username
-- `DOCKERHUB_TOKEN`: Docker Hub access token (create in Docker Hub settings)
-- `VPS_HOST`: Your VPS IP address
-- `VPS_USERNAME`: SSH username for your VPS
-- `VPS_SSH_KEY`: SSH private key for VPS access
-
-### Workflow Process
-
-1. When code is pushed to the `main` branch:
-   - GitHub Actions builds a multi-architecture Docker image (amd64/arm64)
-   - Pushes the image to Docker Hub
-   - Connects to your VPS via SSH
-   - Pulls the latest image and restarts the container
-
-### Manual Deployment
-
-If you need to manually deploy:
-
-1. SSH into your VPS
-2. Navigate to the application directory:
-```bash
-cd /root/docker/url_shortener_alter_office
-```
-
-3. Pull the latest image and restart:
-```bash
-docker compose down
-docker compose pull
-docker compose up -d
-```
-
-## API Documentation
-
-Access the Swagger documentation at:
-```
-http://localhost:3000/api-docs
-```
-
-## API Endpoints
-
-### Authentication
-- `GET /auth/google`: Initiate Google OAuth login
-- `GET /auth/google/callback`: Google OAuth callback
-  - Returns: Access token, refresh token, and user information
-- `GET /auth/logout`: Logout
-
-### URL Operations
-- `POST /api/shorten`: Create short URL
-  - Requires authentication
-  - Body: 
-    ```json
-    {
-      "longUrl": "https://example.com/very/long/url",
-      "customAlias": "custom-alias",  // optional
-      "topic": "acquisition"  // optional
-    }
-    ```
-  - Returns: Short URL and creation timestamp
-
-- `GET /api/shorten/{alias}`: Redirect to original URL
-  - Public endpoint
-  - Tracks visit analytics
-
-### Analytics
-- `GET /api/analytics/{alias}`: Get URL analytics
-  - Requires authentication
-  - Returns:
-    - Total clicks
-    - Unique visitors
-    - Click statistics by date (last 7 days)
-    - OS and device type statistics
-
-- `GET /api/analytics/topic/{topic}`: Get topic-based analytics
-  - Requires authentication
-  - Returns:
-    - Total clicks for topic
-    - Unique visitors for topic
-    - Click statistics by date
-    - Per-URL statistics
-
-- `GET /api/analytics/overall`: Get overall analytics
-  - Requires authentication
-  - Returns:
-    - Total URLs
-    - Total clicks
-    - Unique visitors
-    - Click statistics by date
-    - OS and device type statistics
+---
 
 ## Rate Limiting
 
-The API implements user ID-based rate limiting to prevent abuse:
-- URL creation: 100 requests per 15 minutes per user
-- Analytics endpoints: 100 requests per 15 minutes per user
-- Global API rate limit: Configurable via environment variables
+The API implements token bucket rate limiting:
 
-Rate limiting is backed by Redis in production for better performance and reliability.
-For unauthenticated requests, the system falls back to IP-based rate limiting.
+- **Standard endpoints**: 1,000 requests per minute per user
+- **Sensitive endpoints**: 100 requests per minute per user
+- **Fallback**: IP-based limiting for unauthenticated requests
 
-## Caching
+Rate limit headers are included in responses:
+- `X-RateLimit-Limit`: Maximum requests allowed
+- `X-RateLimit-Remaining`: Requests remaining in window
+- `X-RateLimit-Reset`: Time when limit resets
 
-- URL mappings are cached in Redis for 24 hours
-- Analytics data uses database queries with optimized indexes for performance
-- Database schema includes indexes for:
-  - User IDs
-  - Short codes
-  - Analytics data
-  - Topic-based queries
+---
 
-## Security Features
+## API Documentation
 
-- JWT-based authentication
-- Google OAuth for secure user authentication
-- Rate limiting to prevent abuse
-- Secure session management
-- Input validation and sanitization
-- Helmet middleware for security headers
-- CORS protection
-- Environment-based security settings
+Interactive API documentation is available at:
+```
+https://url-shortener-65ru.onrender.com/api-docs
+```
 
-## Error Handling
-
-The API implements comprehensive error handling:
-- Validation errors (400)
-- Authentication errors (401)
-- Rate limiting errors (429)
-- Not found errors (404)
-- Server errors (500)
-
-## Development
-
-The project uses the following development tools:
-- Nodemon for development auto-reload
-- Jest for testing
-- Supertest for API testing
+---
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Create a Pull Request
+2. Create a feature branch: `git checkout -b feature/new-feature`
+3. Commit changes: `git commit -m "Add new feature"`
+4. Push to branch: `git push origin feature/new-feature`
+5. Open a Pull Request
+
+---
 
 ## License
 
 MIT License
 
-## Support
+---
 
-For support, please open an issue in the repository. 
+## Author
+
+Sanjeev - [GitHub](https://github.com/Sanjeev-IITD)
