@@ -205,7 +205,7 @@ async function handleShortenSubmit(e) {
 
     try {
         const payload = {
-            url: longUrl
+            longUrl: longUrl
         };
 
         // Add optional fields
@@ -322,7 +322,7 @@ function selectEndpoint(method, path) {
     // Pre-fill request body for POST requests
     if (method === 'POST' && path === '/api/shorten') {
         elements.requestBody.value = JSON.stringify({
-            url: 'https://example.com/your-long-url'
+            longUrl: 'https://example.com/your-long-url'
         }, null, 2);
     } else {
         elements.requestBody.value = '';
