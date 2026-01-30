@@ -58,7 +58,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add smooth page transitions for navigation
     initPageTransitions();
+    initMobileMenu();
 });
+
+function initMobileMenu() {
+    const mobileBtn = document.getElementById('mobile-menu-btn');
+    const navContent = document.getElementById('nav-content');
+    const menuLinks = document.querySelectorAll('.menu-link');
+
+    if (!mobileBtn || !navContent) return;
+
+    mobileBtn.addEventListener('click', () => {
+        mobileBtn.classList.toggle('active');
+        navContent.classList.toggle('active');
+        document.body.style.overflow = navContent.classList.contains('active') ? 'hidden' : '';
+    });
+
+    // Close menu when link is clicked
+    menuLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            mobileBtn.classList.remove('active');
+            navContent.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    });
+}
 
 function initVisuals() {
     // Splitting.js for text animations (home page only)
