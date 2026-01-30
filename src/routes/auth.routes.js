@@ -85,23 +85,47 @@ router.get('/current-auth', (req, res) => {
 });
 
 // Logout route
-router.get('/logout', authenticateToken, async (req, res) => {
+router.get('/logout', async (req, res) => {
   try {
-    // Get the token from the authorization header
+    // Try to get the token from Authorization header or session
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    let token = authHeader && authHeader.split(' ')[1];
 
-    // Blacklist the current token
-    await TokenService.blacklistToken(token, req.user.userId);
+    // If no token in header, try session
+    if (!token && req.session && req.session.authData && req.session.authData.accessToken) {
+      token = req.session.authData.accessToken;
+    }
 
-    // Clear the session if it exists
+    // Only blacklist if we have a token and a user ID
+    const userId = req.user?.userId ||
+      req.session?.authData?.user?.id ||
+      (req.user?.google_id);
+
+    if (token && userId) {
+      try {
+        await TokenService.blacklistToken(token, userId);
+      } catch (blacklistError) {
+        // Log but don't fail the logout if token blacklisting fails
+        logger.warn('Could not blacklist token:', { error: blacklistError.message });
+      }
+    }
+
+    // Clear the session - this is the most important part for session-based auth
     if (req.session) {
+      // Clear session data first
+      req.session.authData = null;
+      req.session.passport = null;
+
+      // Then destroy the session
       req.session.destroy((err) => {
         if (err) {
           logger.error('Error destroying session:', err);
         }
       });
     }
+
+    // Clear the session cookie
+    res.clearCookie('connect.sid', { path: '/' });
 
     res.json({ message: 'Logged out successfully' });
   } catch (error) {
@@ -110,10 +134,14 @@ router.get('/logout', authenticateToken, async (req, res) => {
       stack: error.stack
     });
 
-    res.status(500).json({
-      error: 'Logout Error',
-      message: error.message || 'Failed to logout'
-    });
+    // Still try to clear session on error
+    if (req.session) {
+      req.session.destroy(() => { });
+    }
+    res.clearCookie('connect.sid', { path: '/' });
+
+    // Return success anyway - user should be logged out
+    res.json({ message: 'Logged out' });
   }
 });
 
