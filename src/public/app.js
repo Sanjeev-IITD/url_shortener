@@ -64,56 +64,76 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initMobileMenu() {
-    const mobileBtn = document.getElementById('mobile-menu-btn');
     const navContent = document.getElementById('nav-content');
-    const menuLinks = document.querySelectorAll('.nav-content .menu-link');
     const userInitialBtn = document.getElementById('user-initial-btn');
     const menuLogoutBtn = document.getElementById('menu-logout-btn');
+    const dropdownMenu = document.getElementById('user-dropdown-menu');
+    const menuLinks = document.querySelectorAll('.nav-content .menu-link');
 
-    if (!mobileBtn || !navContent) return;
+    if (!navContent) return;
 
-    const toggleMenu = (forceState) => {
+    const isMobile = () => window.innerWidth <= 768;
+
+    const toggleMobileMenu = (forceState) => {
         const shouldOpen = forceState !== undefined ? forceState : !navContent.classList.contains('active');
 
         if (shouldOpen) {
-            mobileBtn.classList.add('active');
             navContent.classList.add('active');
+            if (userInitialBtn) userInitialBtn.classList.add('active');
             document.body.style.overflow = 'hidden';
         } else {
-            mobileBtn.classList.remove('active');
             navContent.classList.remove('active');
+            if (userInitialBtn) userInitialBtn.classList.remove('active');
             document.body.style.overflow = '';
         }
     };
 
-    mobileBtn.addEventListener('click', () => toggleMenu());
+    const toggleDesktopDropdown = () => {
+        if (dropdownMenu) {
+            dropdownMenu.classList.toggle('hidden');
+        }
+    };
 
-    // User initial button opens menu on mobile
+    // User initial button behavior
     if (userInitialBtn) {
         userInitialBtn.addEventListener('click', () => {
-            // Only toggle on mobile (when mobile menu is visible)
-            if (window.innerWidth <= 768) {
-                toggleMenu(true);
+            if (isMobile()) {
+                toggleMobileMenu();
+            } else {
+                toggleDesktopDropdown();
             }
         });
     }
 
-    // Close menu when link is clicked
-    menuLinks.forEach(link => {
-        link.addEventListener('click', () => toggleMenu(false));
+    // Close dropdown when clicking outside (desktop)
+    document.addEventListener('click', (e) => {
+        if (!isMobile() && dropdownMenu && !dropdownMenu.classList.contains('hidden')) {
+            const userDropdown = document.querySelector('.user-dropdown');
+            if (userDropdown && !userDropdown.contains(e.target)) {
+                dropdownMenu.classList.add('hidden');
+            }
+        }
     });
 
-    // Menu logout button
+    // Close menu when link is clicked (mobile)
+    menuLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (isMobile()) {
+                toggleMobileMenu(false);
+            }
+        });
+    });
+
+    // Menu logout button (mobile fullscreen menu)
     if (menuLogoutBtn) {
         menuLogoutBtn.addEventListener('click', async () => {
-            toggleMenu(false);
+            toggleMobileMenu(false);
             try {
                 await fetch(`${API_BASE}/auth/logout`, {
                     credentials: 'include'
                 });
                 currentUser = null;
                 showLoggedOutState();
-                // Hide menu logout button
                 menuLogoutBtn.classList.add('hidden');
                 showToast('Logged out');
             } catch (error) {
@@ -122,6 +142,15 @@ function initMobileMenu() {
             }
         });
     }
+
+    // Handle resize to reset state
+    window.addEventListener('resize', () => {
+        if (!isMobile()) {
+            navContent.classList.remove('active');
+            if (userInitialBtn) userInitialBtn.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
 }
 
 function initVisuals() {
@@ -216,13 +245,10 @@ function showLoggedInState() {
 
     if (currentUser) {
         const displayName = currentUser.name || currentUser.email || 'User';
-        if (elements.userName) {
-            elements.userName.textContent = displayName;
-        }
-        // Set user initial for mobile button
+        // Set user initial for button (shown on all screen sizes now)
         if (elements.userInitialBtn) {
             const initial = displayName.charAt(0).toUpperCase();
-            elements.userInitialBtn.textContent = initial;
+            elements.userInitialBtn.innerHTML = `<span>${initial}</span>`;
         }
         // Show logout button in mobile menu
         if (elements.menuLogoutBtn) {

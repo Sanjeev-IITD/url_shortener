@@ -41,21 +41,20 @@
                         <span>...</span>
                     </div>
                     <div id="auth-logged-out" class="auth-status hidden">
-                        <button id="login-btn" class="btn-text">Login</button>
+                        <button id="login-btn" class="btn-login">Login</button>
                     </div>
                     <div id="auth-logged-in" class="auth-status hidden">
-                        <button id="user-initial-btn" class="user-initial-btn"></button>
-                        <span id="user-name" class="user-name desktop-only"></span>
-                        <button id="logout-btn" class="btn-text desktop-only">Logout</button>
+                        <div class="user-dropdown">
+                            <button id="user-initial-btn" class="user-initial-btn"></button>
+                            <div id="user-dropdown-menu" class="user-dropdown-menu hidden">
+                                <button id="logout-btn" class="dropdown-logout-btn">Logout</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle menu">
-                    <span></span>
-                    <span></span>
-                </button>
-
-                <div id="nav-content" class="nav-content">
+                <!-- Mobile Menu Overlay -->
+                <div id="nav-content" class="nav-content mobile-only">
                     <div class="menu-links">
                         <a href="/" class="menu-link active">Shorten</a>
                         <a href="/analytics.html" class="menu-link">Analytics</a>
