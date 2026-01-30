@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Advanced URL Shortener with Analytics and Rate Limiting">
-    <title>URL Shortener - Shorten, Test & Analyze</title>
+    <title>URL Shortener - Shorten, Analyze & Explore Architecture</title>
     <link rel="stylesheet" href="/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
     <div class="app-container">
         <!-- Header -->
@@ -18,7 +20,8 @@
             <div class="header-content">
                 <div class="logo">
                     <div class="logo-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                         </svg>
@@ -31,7 +34,8 @@
                     </div>
                     <div id="auth-logged-out" class="auth-status hidden">
                         <button id="login-btn" class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
                                 <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
                                 <polyline points="10 17 15 12 10 7"></polyline>
                                 <line x1="15" y1="12" x2="3" y2="12"></line>
@@ -53,21 +57,26 @@
         <!-- Navigation Tabs -->
         <nav class="tabs-nav">
             <button class="tab-btn active" data-tab="shorten">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
                     <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                     <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                 </svg>
                 Shorten URL
             </button>
-            <button class="tab-btn" data-tab="test">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="16 18 22 12 16 6"></polyline>
-                    <polyline points="8 6 2 12 8 18"></polyline>
+            <button class="tab-btn" data-tab="architecture">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
                 </svg>
-                Test Mode
+                Architecture
             </button>
             <button class="tab-btn" data-tab="analytics">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
                     <line x1="18" y1="20" x2="18" y2="10"></line>
                     <line x1="12" y1="20" x2="12" y2="4"></line>
                     <line x1="6" y1="20" x2="6" y2="14"></line>
@@ -85,28 +94,33 @@
                         <h1>Shorten Your Links</h1>
                         <p>Create short, memorable links with powerful analytics</p>
                     </div>
-                    
+
                     <form id="shorten-form" class="shorten-form">
                         <div class="input-group main-input">
                             <label for="long-url">Enter your long URL</label>
-                            <input type="url" id="long-url" placeholder="https://example.com/your-very-long-url-here..." required>
+                            <input type="url" id="long-url" placeholder="https://example.com/your-very-long-url-here..."
+                                required>
                         </div>
-                        
+
                         <div class="options-toggle">
                             <button type="button" id="toggle-options" class="btn btn-ghost">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="3"></circle>
-                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                    <path
+                                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                    </path>
                                 </svg>
                                 Advanced Options
                             </button>
                         </div>
-                        
+
                         <div id="advanced-options" class="advanced-options hidden">
                             <div class="options-grid">
                                 <div class="input-group">
                                     <label for="custom-alias">Custom Alias (optional)</label>
-                                    <input type="text" id="custom-alias" placeholder="my-custom-link" pattern="[a-zA-Z0-9-_]+" title="Only letters, numbers, hyphens and underscores">
+                                    <input type="text" id="custom-alias" placeholder="my-custom-link"
+                                        pattern="[a-zA-Z0-9-_]+" title="Only letters, numbers, hyphens and underscores">
                                 </div>
                                 <div class="input-group">
                                     <label for="topic">Topic/Category (optional)</label>
@@ -124,7 +138,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <button type="submit" id="shorten-btn" class="btn btn-primary btn-large">
                             <span class="btn-text">Shorten URL</span>
                             <div class="btn-loader hidden">
@@ -132,11 +146,12 @@
                             </div>
                         </button>
                     </form>
-                    
+
                     <div id="result-container" class="result-container hidden">
                         <div class="result-card">
                             <div class="result-header">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                 </svg>
@@ -145,7 +160,8 @@
                             <div class="result-url-group">
                                 <input type="text" id="short-url" readonly>
                                 <button type="button" id="copy-btn" class="btn btn-primary">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
                                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                                     </svg>
@@ -160,83 +176,248 @@
                 </div>
             </section>
 
-            <!-- Test Mode Tab -->
-            <section id="test-tab" class="tab-content">
-                <div class="test-container">
-                    <div class="test-header">
-                        <h2>API Test Console</h2>
-                        <p>Test all API endpoints interactively</p>
+            <!-- Architecture Tab -->
+            <section id="architecture-tab" class="tab-content">
+                <div class="architecture-container">
+                    <div class="architecture-header">
+                        <h2>System Architecture</h2>
+                        <p>A comprehensive overview of how the URL Shortener works</p>
                     </div>
-                    
-                    <div class="test-layout">
-                        <div class="test-sidebar">
-                            <h3>Endpoints</h3>
-                            <div class="endpoint-list">
-                                <div class="endpoint-category">
-                                    <h4>Authentication</h4>
-                                    <button class="endpoint-btn" data-method="GET" data-path="/auth/google">
-                                        <span class="method-badge get">GET</span>
-                                        /auth/google
-                                    </button>
-                                    <button class="endpoint-btn" data-method="GET" data-path="/auth/current-auth">
-                                        <span class="method-badge get">GET</span>
-                                        /auth/current-auth
-                                    </button>
-                                    <button class="endpoint-btn" data-method="GET" data-path="/auth/logout">
-                                        <span class="method-badge get">GET</span>
-                                        /auth/logout
-                                    </button>
+
+                    <!-- System Diagram -->
+                    <div class="architecture-diagram">
+                        <div class="diagram-row">
+                            <div class="arch-component client">
+                                <div class="component-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                                    </svg>
                                 </div>
-                                <div class="endpoint-category">
-                                    <h4>URLs</h4>
-                                    <button class="endpoint-btn" data-method="POST" data-path="/api/shorten">
-                                        <span class="method-badge post">POST</span>
-                                        /api/shorten
-                                    </button>
-                                    <button class="endpoint-btn" data-method="GET" data-path="/api/shorten/{alias}">
-                                        <span class="method-badge get">GET</span>
-                                        /api/shorten/{alias}
-                                    </button>
+                                <h4>Client</h4>
+                                <p>Browser / User</p>
+                                <span class="tech-badge">HTML/CSS/JS</span>
+                            </div>
+
+                            <div class="flow-arrow">→</div>
+
+                            <div class="arch-component auth">
+                                <div class="component-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    </svg>
                                 </div>
-                                <div class="endpoint-category">
-                                    <h4>Analytics</h4>
-                                    <button class="endpoint-btn" data-method="GET" data-path="/api/analytics/{alias}">
-                                        <span class="method-badge get">GET</span>
-                                        /api/analytics/{alias}
-                                    </button>
-                                    <button class="endpoint-btn" data-method="GET" data-path="/api/analytics/topic/{topic}">
-                                        <span class="method-badge get">GET</span>
-                                        /api/analytics/topic/{topic}
-                                    </button>
-                                    <button class="endpoint-btn" data-method="GET" data-path="/api/analytics/overall">
-                                        <span class="method-badge get">GET</span>
-                                        /api/analytics/overall
-                                    </button>
+                                <h4>Google OAuth</h4>
+                                <p>Authentication</p>
+                                <span class="tech-badge">Passport.js</span>
+                            </div>
+
+                            <div class="flow-arrow">→</div>
+
+                            <div class="arch-component api">
+                                <div class="component-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                                        <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                                        <rect x="9" y="9" width="6" height="6"></rect>
+                                        <line x1="9" y1="1" x2="9" y2="4"></line>
+                                        <line x1="15" y1="1" x2="15" y2="4"></line>
+                                        <line x1="9" y1="20" x2="9" y2="23"></line>
+                                        <line x1="15" y1="20" x2="15" y2="23"></line>
+                                    </svg>
+                                </div>
+                                <h4>Node.js API</h4>
+                                <p>Express.js Server</p>
+                                <span class="tech-badge">REST API</span>
+                            </div>
+                        </div>
+
+                        <div class="diagram-row storage-row">
+                            <div class="arch-component cache">
+                                <div class="component-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                    </svg>
+                                </div>
+                                <h4>Redis</h4>
+                                <p>Session & Cache</p>
+                                <span class="tech-badge">Upstash</span>
+                            </div>
+
+                            <div class="arch-component database">
+                                <div class="component-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                                        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                                    </svg>
+                                </div>
+                                <h4>PostgreSQL</h4>
+                                <p>Primary Database</p>
+                                <span class="tech-badge">Neon.tech</span>
+                            </div>
+
+                            <div class="arch-component hosting">
+                                <div class="component-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                                        <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                                        <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                                        <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                                        <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                                    </svg>
+                                </div>
+                                <h4>Render</h4>
+                                <p>Cloud Hosting</p>
+                                <span class="tech-badge">Docker</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Flow Section -->
+                    <div class="flow-section">
+                        <h3>How URL Shortening Works</h3>
+                        <div class="flow-steps">
+                            <div class="flow-step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>User Authentication</h4>
+                                    <p>User logs in via Google OAuth 2.0. Session is stored in Redis for persistence.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flow-step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>URL Submission</h4>
+                                    <p>Long URL is validated and sent to the API. Rate limiting prevents abuse.</p>
+                                </div>
+                            </div>
+                            <div class="flow-step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h4>Alias Generation</h4>
+                                    <p>Unique short alias is generated (or custom alias validated). Data stored in
+                                        PostgreSQL.</p>
+                                </div>
+                            </div>
+                            <div class="flow-step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h4>Redirect & Track</h4>
+                                    <p>When short URL is visited, user is redirected. Analytics captured: IP, device,
+                                        location.</p>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="test-main">
-                            <div class="request-builder">
-                                <div class="request-header">
-                                    <span id="selected-method" class="method-badge get">GET</span>
-                                    <input type="text" id="request-url" value="/health" class="request-url-input">
-                                    <button id="send-request-btn" class="btn btn-primary">Send</button>
-                                </div>
-                                
-                                <div class="request-body-section">
-                                    <h4>Request Body (JSON)</h4>
-                                    <textarea id="request-body" placeholder='{"url": "https://example.com"}'></textarea>
-                                </div>
-                                
-                                <div class="response-section">
-                                    <div class="response-header">
-                                        <h4>Response</h4>
-                                        <span id="response-status" class="status-badge"></span>
-                                        <span id="response-time" class="response-time"></span>
-                                    </div>
-                                    <pre id="response-body" class="response-body">Click "Send" to make a request...</pre>
-                                </div>
+                    </div>
+
+                    <!-- Tech Stack Grid -->
+                    <div class="tech-stack-section">
+                        <h3>Technology Stack</h3>
+                        <div class="tech-grid">
+                            <div class="tech-card">
+                                <div class="tech-icon backend">⚡</div>
+                                <h4>Backend</h4>
+                                <ul>
+                                    <li>Node.js</li>
+                                    <li>Express.js</li>
+                                    <li>Passport.js</li>
+                                    <li>JWT Tokens</li>
+                                </ul>
+                            </div>
+                            <div class="tech-card">
+                                <div class="tech-icon database">🗄️</div>
+                                <h4>Database</h4>
+                                <ul>
+                                    <li>PostgreSQL</li>
+                                    <li>Redis Cache</li>
+                                    <li>Session Store</li>
+                                    <li>Token Blacklist</li>
+                                </ul>
+                            </div>
+                            <div class="tech-card">
+                                <div class="tech-icon security">🔒</div>
+                                <h4>Security</h4>
+                                <ul>
+                                    <li>Google OAuth 2.0</li>
+                                    <li>Rate Limiting</li>
+                                    <li>Helmet.js</li>
+                                    <li>CORS Protection</li>
+                                </ul>
+                            </div>
+                            <div class="tech-card">
+                                <div class="tech-icon analytics">📊</div>
+                                <h4>Analytics</h4>
+                                <ul>
+                                    <li>Click Tracking</li>
+                                    <li>Geo Location</li>
+                                    <li>Device Detection</li>
+                                    <li>Chart.js Graphs</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Features -->
+                    <div class="features-section">
+                        <h3>Key Features</h3>
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">🚀</div>
+                                <h4>High Performance</h4>
+                                <p>Redis caching for fast redirects. Sub-100ms response times.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📈</div>
+                                <h4>Rich Analytics</h4>
+                                <p>Track clicks, devices, locations, and trends over time.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🔐</div>
+                                <h4>Secure Auth</h4>
+                                <p>Google OAuth with JWT tokens and session management.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🛡️</div>
+                                <h4>Rate Limiting</h4>
+                                <p>Token bucket algorithm prevents API abuse.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🎨</div>
+                                <h4>Custom Aliases</h4>
+                                <p>Create memorable branded short links.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">☁️</div>
+                                <h4>Cloud Native</h4>
+                                <p>Dockerized and deployed on Render with auto-scaling.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Documentation Link -->
+                    <div class="api-docs-section">
+                        <div class="api-docs-card">
+                            <div class="api-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="api-docs-content">
+                                <h4>API Documentation</h4>
+                                <p>Explore the complete REST API with Swagger UI</p>
+                                <a href="/api-docs" target="_blank" class="btn btn-primary">View API Docs →</a>
                             </div>
                         </div>
                     </div>
@@ -249,7 +430,8 @@
                     <div class="analytics-header">
                         <h2>Analytics Dashboard</h2>
                         <button id="refresh-analytics" class="btn btn-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
                                 <polyline points="23 4 23 10 17 10"></polyline>
                                 <polyline points="1 20 1 14 7 14"></polyline>
                                 <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
@@ -257,11 +439,12 @@
                             Refresh
                         </button>
                     </div>
-                    
+
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
                                     <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                                     <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                                 </svg>
@@ -273,7 +456,8 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon clicks">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
                                     <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
                                 </svg>
                             </div>
@@ -284,10 +468,13 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon locations">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <line x1="2" y1="12" x2="22" y2="12"></line>
-                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                    <path
+                                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                                    </path>
                                 </svg>
                             </div>
                             <div class="stat-content">
@@ -296,7 +483,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="charts-grid">
                         <div class="chart-card">
                             <h3>Clicks Over Time</h3>
@@ -307,7 +494,7 @@
                             <canvas id="devices-chart"></canvas>
                         </div>
                     </div>
-                    
+
                     <div class="top-urls-section">
                         <h3>Top Performing URLs</h3>
                         <div class="table-container">
@@ -322,7 +509,8 @@
                                 </thead>
                                 <tbody id="top-urls-body">
                                     <tr>
-                                        <td colspan="4" class="empty-state">No data available. Create some short URLs first!</td>
+                                        <td colspan="4" class="empty-state">No data available. Create some short URLs
+                                            first!</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -338,4 +526,5 @@
 
     <script src="/app.js"></script>
 </body>
+
 </html>

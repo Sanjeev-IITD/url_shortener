@@ -34,15 +34,6 @@ const elements = {
     copyBtn: document.getElementById('copy-btn'),
     originalUrl: document.getElementById('original-url'),
 
-    // Test Mode
-    endpointBtns: document.querySelectorAll('.endpoint-btn'),
-    selectedMethod: document.getElementById('selected-method'),
-    requestUrl: document.getElementById('request-url'),
-    requestBody: document.getElementById('request-body'),
-    sendRequestBtn: document.getElementById('send-request-btn'),
-    responseStatus: document.getElementById('response-status'),
-    responseTime: document.getElementById('response-time'),
-    responseBody: document.getElementById('response-body'),
 
     // Analytics
     refreshAnalytics: document.getElementById('refresh-analytics'),
@@ -67,7 +58,6 @@ let devicesChart = null;
 document.addEventListener('DOMContentLoaded', () => {
     initTabs();
     initShortenForm();
-    initTestMode();
     initAnalytics();
     checkAuthStatus();
 });
@@ -292,112 +282,6 @@ async function handleCopy() {
     }
 }
 
-/* ========================================
-   Test Mode
-   ======================================== */
-
-function initTestMode() {
-    // Endpoint buttons
-    elements.endpointBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const method = btn.dataset.method;
-            const path = btn.dataset.path;
-
-            selectEndpoint(method, path);
-        });
-    });
-
-    // Send request button
-    elements.sendRequestBtn?.addEventListener('click', sendTestRequest);
-}
-
-function selectEndpoint(method, path) {
-    // Update method badge
-    elements.selectedMethod.textContent = method;
-    elements.selectedMethod.className = `method-badge ${method.toLowerCase()}`;
-
-    // Update URL
-    elements.requestUrl.value = path;
-
-    // Pre-fill request body for POST requests
-    if (method === 'POST' && path === '/api/shorten') {
-        elements.requestBody.value = JSON.stringify({
-            longUrl: 'https://example.com/your-long-url'
-        }, null, 2);
-    } else {
-        elements.requestBody.value = '';
-    }
-
-    // Clear previous response
-    elements.responseStatus.textContent = '';
-    elements.responseStatus.className = 'status-badge';
-    elements.responseTime.textContent = '';
-    elements.responseBody.textContent = 'Click "Send" to make a request...';
-}
-
-async function sendTestRequest() {
-    const method = elements.selectedMethod.textContent;
-    let path = elements.requestUrl.value;
-
-    // Replace path parameters with prompts
-    if (path.includes('{alias}')) {
-        const alias = prompt('Enter the alias:');
-        if (!alias) return;
-        path = path.replace('{alias}', alias);
-    }
-    if (path.includes('{topic}')) {
-        const topic = prompt('Enter the topic:');
-        if (!topic) return;
-        path = path.replace('{topic}', topic);
-    }
-
-    elements.responseBody.textContent = 'Loading...';
-    elements.responseStatus.textContent = '';
-    elements.responseTime.textContent = '';
-
-    const startTime = performance.now();
-
-    try {
-        const options = {
-            method,
-            credentials: 'include',
-            headers: {}
-        };
-
-        // Add body for POST/PUT requests
-        if (['POST', 'PUT', 'PATCH'].includes(method) && elements.requestBody.value.trim()) {
-            options.headers['Content-Type'] = 'application/json';
-            options.body = elements.requestBody.value;
-        }
-
-        const response = await fetch(`${API_BASE}${path}`, options);
-        const endTime = performance.now();
-
-        // Update status
-        elements.responseStatus.textContent = `${response.status} ${response.statusText}`;
-        elements.responseStatus.className = `status-badge ${response.ok ? 'success' : 'error'}`;
-        elements.responseTime.textContent = `${Math.round(endTime - startTime)}ms`;
-
-        // Parse and display response
-        let data;
-        const contentType = response.headers.get('content-type');
-
-        if (contentType && contentType.includes('application/json')) {
-            data = await response.json();
-            elements.responseBody.textContent = JSON.stringify(data, null, 2);
-        } else {
-            data = await response.text();
-            elements.responseBody.textContent = data || '(Empty response)';
-        }
-
-    } catch (error) {
-        const endTime = performance.now();
-        elements.responseStatus.textContent = 'Error';
-        elements.responseStatus.className = 'status-badge error';
-        elements.responseTime.textContent = `${Math.round(endTime - startTime)}ms`;
-        elements.responseBody.textContent = error.message;
-    }
-}
 
 /* ========================================
    Analytics Dashboard
