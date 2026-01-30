@@ -370,6 +370,12 @@ a {
     background: #fff;
     padding: 2rem;
     border: 1px solid var(--border);
+    height: 300px;
+    position: relative;
+}
+
+.chart-box canvas {
+    max-height: 220px;
 }
 
 .chart-box h3 {
