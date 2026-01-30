@@ -8,35 +8,33 @@
     <meta name="theme-color" content="#ebebeb">
     <title>URL Shortener — Utility</title>
 
-    <!-- Design Principles: Playfair Display for headers, Inter/Harmond for body -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap"
         rel="stylesheet">
 
-    <!-- External Libraries -->
     <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css" />
     <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting-cells.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="/styles.css">
 </head>
 
-<body class="smooth-scroll">
+<body class="page-transition">
     <div class="app-container">
         <!-- Navigation -->
         <nav class="nav">
             <div class="nav-wrapper container">
                 <div class="logo">
-                    <span class="font-playfair">Shortener</span>
-                    <span class="version">Vol.1</span>
+                    <a href="/" class="logo-link">
+                        <span class="font-playfair">Shortener</span>
+                        <span class="version">Vol.1</span>
+                    </a>
                 </div>
 
                 <div class="menu-links hide-mobile">
-                    <a href="#shorten" class="menu-link" data-splitting>Shorten</a>
-                    <a href="#stats" class="menu-link" data-splitting>Analytics</a>
-                    <a href="#arch" class="menu-link" data-splitting>Architecture</a>
+                    <a href="/" class="menu-link active">Shorten</a>
+                    <a href="/analytics.html" class="menu-link">Analytics</a>
                 </div>
 
                 <div class="auth-section">
@@ -44,9 +42,7 @@
                         <span>Loading...</span>
                     </div>
                     <div id="auth-logged-out" class="auth-status hidden">
-                        <button id="login-btn" class="btn-text">
-                            Login
-                        </button>
+                        <button id="login-btn" class="btn-text">Login</button>
                     </div>
                     <div id="auth-logged-in" class="auth-status hidden">
                         <span id="user-name" class="user-name"></span>
@@ -56,9 +52,9 @@
             </div>
         </nav>
 
-        <main data-scroll-container>
+        <main class="page-content">
             <!-- Hero / Shorten Section -->
-            <section id="shorten" class="section hero-section">
+            <section id="shorten" class="section hero-section fade-in-up">
                 <div class="container">
                     <div class="hero-content">
                         <h1 class="hero-title" data-splitting>
@@ -82,35 +78,6 @@
                                     </button>
                                 </div>
                                 <div class="loader-line hidden"></div>
-
-                                <div class="form-footer">
-                                    <button type="button" id="toggle-options" class="btn-link">
-                                        + Advanced Options
-                                    </button>
-                                </div>
-
-                                <div id="advanced-options" class="advanced-panel hidden">
-                                    <div class="grid-2">
-                                        <div class="input-line-group">
-                                            <label>Alias</label>
-                                            <input type="text" id="custom-alias" placeholder="custom-name">
-                                        </div>
-                                        <div class="input-line-group">
-                                            <label>Topic</label>
-                                            <input type="text" id="topic" placeholder="marketing">
-                                        </div>
-                                        <div class="input-line-group">
-                                            <label>Expiration</label>
-                                            <select id="expiration">
-                                                <option value="">Never</option>
-                                                <option value="1h">1 Hour</option>
-                                                <option value="24h">24 Hours</option>
-                                                <option value="7d">7 Days</option>
-                                                <option value="30d">30 Days</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
                             </form>
 
                             <div id="result-container" class="result-display hidden">
@@ -123,105 +90,6 @@
                                     <span id="original-url" class="meta-url"></span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Stats Section -->
-            <section id="stats" class="section stats-section">
-                <div class="container">
-                    <div class="section-header">
-                        <span class="section-number">01</span>
-                        <h2 class="font-playfair">Analytics</h2>
-                    </div>
-
-                    <div class="stats-overview">
-                        <div class="stat-item">
-                            <span class="stat-label">Total URLs</span>
-                            <span class="stat-number display-2" id="total-urls">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Total Clicks</span>
-                            <span class="stat-number display-2" id="total-clicks">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Locations</span>
-                            <span class="stat-number display-2" id="unique-locations">0</span>
-                        </div>
-                    </div>
-
-                    <div class="charts-wrap">
-                        <div class="chart-box">
-                            <h3>Performance</h3>
-                            <canvas id="clicks-chart"></canvas>
-                        </div>
-                        <div class="chart-box">
-                            <h3>Devices</h3>
-                            <canvas id="devices-chart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="top-list">
-                        <h3>Top 5 Links</h3>
-                        <div class="table-minimal">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Short</th>
-                                        <th>Origin</th>
-                                        <th>Clicks</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="top-urls-body">
-                                    <tr>
-                                        <td colspan="4" class="text-center">No data available</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Architecture Section -->
-            <section id="arch" class="section arch-section">
-                <div class="container">
-                    <div class="section-header">
-                        <span class="section-number">02</span>
-                        <h2 class="font-playfair">Architecture</h2>
-                    </div>
-
-                    <div class="arch-grid">
-                        <div class="arch-node">
-                            <h4>Client</h4>
-                            <p>HTML/JS</p>
-                        </div>
-                        <div class="arch-line"></div>
-                        <div class="arch-node">
-                            <h4>API</h4>
-                            <p>Node/Express</p>
-                        </div>
-                        <div class="arch-line"></div>
-                        <div class="arch-node">
-                            <h4>Store</h4>
-                            <p>Postgres/Redis</p>
-                        </div>
-                    </div>
-
-                    <div class="tech-list">
-                        <div class="tech-item">
-                            <span>Backend</span>
-                            <span>Node.js, Express, Passport</span>
-                        </div>
-                        <div class="tech-item">
-                            <span>Database</span>
-                            <span>PostgreSQL, Redis</span>
-                        </div>
-                        <div class="tech-item">
-                            <span>DevOps</span>
-                            <span>Docker, Render</span>
                         </div>
                     </div>
                 </div>
@@ -249,7 +117,6 @@
     <!-- Scripts -->
     <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/ScrollTrigger.min.js"></script>
     <script src="/app.js"></script>
 </body>
 

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="URL Shortener Analytics Dashboard">
+    <meta name="theme-color" content="#ebebeb">
+    <title>Analytics — URL Shortener</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap"
+        rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body class="page-transition">
+    <div class="app-container">
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="nav-wrapper container">
+                <div class="logo">
+                    <a href="/" class="logo-link">
+                        <span class="font-playfair">Shortener</span>
+                        <span class="version">Vol.1</span>
+                    </a>
+                </div>
+
+                <div class="menu-links hide-mobile">
+                    <a href="/" class="menu-link">Shorten</a>
+                    <a href="/analytics.html" class="menu-link active">Analytics</a>
+                </div>
+
+                <div class="auth-section">
+                    <div id="auth-loading" class="auth-loading hidden">
+                        <span>Loading...</span>
+                    </div>
+                    <div id="auth-logged-out" class="auth-status hidden">
+                        <button id="login-btn" class="btn-text">Login</button>
+                    </div>
+                    <div id="auth-logged-in" class="auth-status hidden">
+                        <span id="user-name" class="user-name"></span>
+                        <button id="logout-btn" class="btn-text">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="page-content">
+            <!-- Stats Section -->
+            <section id="stats" class="section stats-section fade-in-up">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-number">01</span>
+                        <h2 class="font-playfair">Analytics</h2>
+                    </div>
+
+                    <div class="stats-overview">
+                        <div class="stat-item">
+                            <span class="stat-label">Total URLs</span>
+                            <span class="stat-number display-2" id="total-urls">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Clicks</span>
+                            <span class="stat-number display-2" id="total-clicks">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Locations</span>
+                            <span class="stat-number display-2" id="unique-locations">0</span>
+                        </div>
+                    </div>
+
+                    <div class="charts-wrap">
+                        <div class="chart-box">
+                            <h3>Performance</h3>
+                            <canvas id="clicks-chart"></canvas>
+                        </div>
+                        <div class="chart-box">
+                            <h3>Devices</h3>
+                            <canvas id="devices-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="top-list">
+                        <h3>Top 5 Links</h3>
+                        <div class="table-minimal">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Short</th>
+                                        <th>Origin</th>
+                                        <th>Clicks</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top-urls-body">
+                                    <tr>
+                                        <td colspan="4" class="text-center">No data available</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="footer">
+                <div class="container">
+                    <div class="footer-inner">
+                        <div class="footer-left">
+                            <p>URL Shortener Utility</p>
+                        </div>
+                        <div class="footer-right">
+                            <a href="/api-docs">API Documentation</a>
+                            <span>&copy; 2026</span>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </main>
+
+        <!-- Toast -->
+        <div id="toast-container" class="toast-container"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+    <script src="/app.js"></script>
+</body>
+
+</html>

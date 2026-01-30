@@ -106,6 +106,12 @@ a {
     align-items: baseline;
 }
 
+.logo-link {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+}
+
 .logo .version {
     font-size: 0.8rem;
     font-family: var(--font-body);
@@ -138,9 +144,14 @@ a {
     transition: transform 0.4s var(--ease-out);
 }
 
-.menu-link:hover::after {
+.menu-link:hover::after,
+.menu-link.active::after {
     transform: scaleX(1);
     transform-origin: left;
+}
+
+.menu-link.active {
+    opacity: 1;
 }
 
 .btn-text {
@@ -410,73 +421,53 @@ a {
     border-bottom: 1px solid #eee;
 }
 
-/* Architecture Section
+/* Page Transitions
    ======================================== */
-.arch-grid {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 4rem 0;
-    text-align: center;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+.page-transition {
+    animation: pageEnter 0.6s var(--ease-out) forwards;
 }
 
-.arch-node h4 {
-    font-family: var(--font-heading);
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
+.page-content {
+    opacity: 0;
+    animation: contentFadeIn 0.8s var(--ease-out) 0.2s forwards;
 }
 
-.arch-node p {
-    color: var(--text-light);
-    font-size: 0.9rem;
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.8s var(--ease-out) 0.3s forwards;
 }
 
-.arch-line {
-    flex: 1;
-    height: 1px;
-    background: var(--text-color);
-    margin: 0 2rem;
-    position: relative;
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
-.arch-line::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: -2px;
-    width: 5px;
-    height: 5px;
-    background: var(--text-color);
-    border-radius: 50%;
+@keyframes contentFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
-.tech-list {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    margin-top: 6rem;
-    border-top: 1px solid var(--border);
-    padding-top: 2rem;
-}
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
 
-.tech-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.tech-item span:first-child {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    color: var(--text-light);
-}
-
-.tech-item span:last-child {
-    font-size: 1.2rem;
-    font-family: var(--font-heading);
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Footer
@@ -546,20 +537,7 @@ a {
         grid-template-columns: 1fr;
     }
 
-    .arch-grid {
-        flex-direction: column;
-        gap: 2rem;
-    }
 
-    .arch-line {
-        width: 1px;
-        height: 50px;
-        margin: 0;
-    }
-
-    .tech-list {
-        grid-template-columns: 1fr;
-    }
 
     .grid-2 {
         grid-template-columns: 1fr;

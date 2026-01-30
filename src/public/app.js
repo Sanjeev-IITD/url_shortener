@@ -5,7 +5,7 @@
 // API Configuration
 const API_BASE = window.location.origin;
 
-// DOM Elements
+// DOM Elements - use optional chaining since not all elements exist on all pages
 const elements = {
     // Auth
     authLoading: document.getElementById('auth-loading'),
@@ -15,22 +15,16 @@ const elements = {
     logoutBtn: document.getElementById('logout-btn'),
     userName: document.getElementById('user-name'),
 
-    // Shorten Form
+    // Shorten Form (home page only)
     shortenForm: document.getElementById('shorten-form'),
     longUrlInput: document.getElementById('long-url'),
-    customAlias: document.getElementById('custom-alias'),
-    topic: document.getElementById('topic'),
-    expiration: document.getElementById('expiration'),
-    toggleOptions: document.getElementById('toggle-options'),
-    advancedOptions: document.getElementById('advanced-options'),
     shortenBtn: document.getElementById('shorten-btn'),
     resultContainer: document.getElementById('result-container'),
     shortUrlInput: document.getElementById('short-url'),
     copyBtn: document.getElementById('copy-btn'),
     originalUrl: document.getElementById('original-url'),
 
-    // Analytics
-    refreshAnalytics: document.getElementById('refresh-analytics'),
+    // Analytics (analytics page only)
     totalUrls: document.getElementById('total-urls'),
     totalClicks: document.getElementById('total-clicks'),
     uniqueLocations: document.getElementById('unique-locations'),
@@ -51,49 +45,30 @@ let devicesChart = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     initVisuals();
-    initShortenForm();
-    initAnalytics();
     checkAuthStatus();
 
-    // Smooth scroll for nav links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
-        });
-    });
+    // Initialize page-specific features
+    const currentPage = window.location.pathname;
+
+    if (currentPage === '/' || currentPage === '/index.html') {
+        initShortenForm();
+    } else if (currentPage === '/analytics.html') {
+        initAnalytics();
+    }
+
+    // Add smooth page transitions for navigation
+    initPageTransitions();
 });
 
 function initVisuals() {
-    // Splitting.js for text animations
+    // Splitting.js for text animations (home page only)
     if (window.Splitting) {
         Splitting();
     }
 
-    // GSAP ScrollTrigger
-    if (window.gsap && window.ScrollTrigger) {
-        gsap.registerPlugin(ScrollTrigger);
-
-        // Reveal sections
-        gsap.utils.toArray('.section').forEach(section => {
-            gsap.fromTo(section,
-                { opacity: 0, y: 50 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 1,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: section,
-                        start: "top 80%"
-                    }
-                }
-            );
-        });
-
-        // Reveal header text
+    // GSAP animations
+    if (window.gsap) {
+        // Animate hero title characters
         gsap.from(".hero-title .char", {
             duration: 1,
             y: 100,
@@ -104,6 +79,42 @@ function initVisuals() {
         });
     }
 }
+
+function initPageTransitions() {
+    // Add transition effect when clicking navigation links
+    document.querySelectorAll('.menu-link, .logo-link').forEach(link => {
+        link.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+
+            // Skip if it's the current page
+            if (href === window.location.pathname) {
+                e.preventDefault();
+                return;
+            }
+
+            // Add exit animation
+            e.preventDefault();
+            document.body.classList.add('page-exit');
+
+            setTimeout(() => {
+                window.location.href = href;
+            }, 300);
+        });
+    });
+}
+
+// Add exit animation styles dynamically
+const exitStyles = document.createElement('style');
+exitStyles.textContent = `
+    .page-exit {
+        animation: pageExit 0.3s ease-in forwards;
+    }
+    @keyframes pageExit {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-20px); }
+    }
+`;
+document.head.appendChild(exitStyles);
 
 /* ========================================
    Authentication
@@ -116,35 +127,37 @@ async function checkAuthStatus() {
         });
 
         const data = await response.json();
-        elements.authLoading.classList.add('hidden');
+        elements.authLoading?.classList.add('hidden');
 
         if (data.authenticated && data.user) {
             currentUser = data.user;
             showLoggedInState();
-            // Load analytics automatically when logged in
-            loadAnalyticsData();
+            // Load analytics if on analytics page
+            if (window.location.pathname === '/analytics.html') {
+                loadAnalyticsData();
+            }
         } else {
             showLoggedOutState();
         }
     } catch (error) {
         console.error('Auth check failed:', error);
-        elements.authLoading.classList.add('hidden');
+        elements.authLoading?.classList.add('hidden');
         showLoggedOutState();
     }
 }
 
 function showLoggedInState() {
-    elements.authLoggedOut.classList.add('hidden');
-    elements.authLoggedIn.classList.remove('hidden');
+    elements.authLoggedOut?.classList.add('hidden');
+    elements.authLoggedIn?.classList.remove('hidden');
 
-    if (currentUser) {
+    if (currentUser && elements.userName) {
         elements.userName.textContent = currentUser.name || currentUser.email || 'User';
     }
 }
 
 function showLoggedOutState() {
-    elements.authLoggedIn.classList.add('hidden');
-    elements.authLoggedOut.classList.remove('hidden');
+    elements.authLoggedIn?.classList.add('hidden');
+    elements.authLoggedOut?.classList.remove('hidden');
 }
 
 // Login button
@@ -168,18 +181,10 @@ elements.logoutBtn?.addEventListener('click', async () => {
 });
 
 /* ========================================
-   Shorten URL Form
+   Shorten URL Form (Home Page)
    ======================================== */
 
 function initShortenForm() {
-    // Toggle advanced options
-    elements.toggleOptions?.addEventListener('click', () => {
-        elements.advancedOptions.classList.toggle('hidden');
-        elements.toggleOptions.textContent = elements.advancedOptions.classList.contains('hidden')
-            ? '+ Advanced Options'
-            : '- Hide Options';
-    });
-
     // Form submission
     elements.shortenForm?.addEventListener('submit', handleShortenSubmit);
 
@@ -202,32 +207,11 @@ async function handleShortenSubmit(e) {
     }
 
     // Loading state
-    const btnIcon = elements.shortenBtn.querySelector('svg');
     const loaderLine = document.querySelector('.loader-line');
-
-    // elements.shortenBtn.disabled = true;
-    loaderLine.classList.remove('hidden');
+    loaderLine?.classList.remove('hidden');
 
     try {
         const payload = { longUrl: longUrl };
-
-        // Add optional fields
-        const customAlias = elements.customAlias.value.trim();
-        const topic = elements.topic.value.trim();
-        const expiration = elements.expiration.value;
-
-        if (customAlias) payload.customAlias = customAlias;
-        if (topic) payload.topic = topic;
-        if (expiration) {
-            const now = new Date();
-            switch (expiration) {
-                case '1h': now.setHours(now.getHours() + 1); break;
-                case '24h': now.setHours(now.getHours() + 24); break;
-                case '7d': now.setDate(now.getDate() + 7); break;
-                case '30d': now.setDate(now.getDate() + 30); break;
-            }
-            payload.expiresAt = now.toISOString();
-        }
 
         const response = await fetch(`${API_BASE}/api/shorten`, {
             method: 'POST',
@@ -258,17 +242,13 @@ async function handleShortenSubmit(e) {
 
         // Clear form
         elements.longUrlInput.value = '';
-        elements.customAlias.value = '';
-
-        // Refresh analytics if visible
-        loadAnalyticsData();
 
     } catch (error) {
         console.error('Shorten failed:', error);
         showToast(error.message || 'Failed to shorten URL', 'error');
     } finally {
-        loaderLine.classList.add('hidden');
-        elements.shortenBtn.disabled = false;
+        loaderLine?.classList.add('hidden');
+        if (elements.shortenBtn) elements.shortenBtn.disabled = false;
     }
 }
 
@@ -285,11 +265,15 @@ async function handleCopy() {
 }
 
 /* ========================================
-   Analytics Dashboard
+   Analytics Dashboard (Analytics Page)
    ======================================== */
 
 function initAnalytics() {
     initCharts();
+    // Load data if already logged in
+    if (currentUser) {
+        loadAnalyticsData();
+    }
 }
 
 function initCharts() {
@@ -315,7 +299,7 @@ function initCharts() {
                 datasets: [{
                     label: 'Clicks',
                     data: [],
-                    borderColor: '#1a1a1a', // Black
+                    borderColor: '#1a1a1a',
                     borderWidth: 2,
                     backgroundColor: 'rgba(0,0,0,0.05)',
                     fill: true,
@@ -338,10 +322,10 @@ function initCharts() {
                 datasets: [{
                     data: [0, 0, 0, 0],
                     backgroundColor: [
-                        '#1a1a1a', // Black
-                        '#666666', // Dark Grey
-                        '#999999', // Medium Grey
-                        '#d4d4d4'  // Light Grey
+                        '#1a1a1a',
+                        '#666666',
+                        '#999999',
+                        '#d4d4d4'
                     ],
                     borderWidth: 0
                 }]
@@ -372,14 +356,14 @@ async function loadAnalyticsData() {
             credentials: 'include'
         });
 
-        if (!response.ok) return; // Silent fail if just background refresh
+        if (!response.ok) return;
 
         const data = await response.json();
 
         // Update numbers with animation
-        animateValue(elements.totalUrls, data.totalUrls || 0);
-        animateValue(elements.totalClicks, data.totalClicks || 0);
-        animateValue(elements.uniqueLocations, data.uniqueLocations || 0);
+        if (elements.totalUrls) animateValue(elements.totalUrls, data.totalUrls || 0);
+        if (elements.totalClicks) animateValue(elements.totalClicks, data.totalClicks || 0);
+        if (elements.uniqueLocations) animateValue(elements.uniqueLocations, data.uniqueLocations || 0);
 
         // Update charts
         if (clicksChart && data.clicksOverTime) {
@@ -399,7 +383,7 @@ async function loadAnalyticsData() {
         }
 
         // Update Table
-        if (data.topUrls && data.topUrls.length > 0) {
+        if (data.topUrls && data.topUrls.length > 0 && elements.topUrlsBody) {
             elements.topUrlsBody.innerHTML = data.topUrls.map(url => `
                 <tr>
                     <td><a href="${API_BASE}/${url.alias}" target="_blank" style="text-decoration:underline">${url.alias}</a></td>
@@ -452,12 +436,12 @@ function showToast(message, type = 'normal') {
     `;
 
     if (type === 'error') {
-        toast.style.background = '#000'; // Keep it monochrome but maybe distinct border
+        toast.style.background = '#000';
         toast.style.borderLeft = '3px solid #666';
     }
 
     toast.textContent = message;
-    elements.toastContainer.appendChild(toast);
+    elements.toastContainer?.appendChild(toast);
 
     setTimeout(() => {
         toast.style.opacity = '0';
