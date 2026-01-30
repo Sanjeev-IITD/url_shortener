@@ -88,9 +88,8 @@ a {
     width: 100%;
     z-index: 100;
     padding: 1.5rem 0;
-    mix-blend-mode: difference;
-    color: #fff;
-    /* Inverted due to difference mode */
+    background: var(--bg-color);
+    color: var(--text-color);
 }
 
 .nav-wrapper {
@@ -372,7 +371,7 @@ a {
 
 .charts-wrap {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 2rem;
     margin-bottom: 4rem;
 }
@@ -473,15 +472,16 @@ a {
 /* Footer
    ======================================== */
 .footer {
-    padding: 4rem 0;
-    border-top: 1px solid var(--text-color);
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
 }
 
 .footer-inner {
     display: flex;
     justify-content: space-between;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
+    color: var(--text-light);
 }
 
 /* Helper Classes
