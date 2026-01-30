@@ -3,12 +3,21 @@ const Redis = require('redis');
 
 // PostgreSQL configuration
 const pool = new Pool({
-  host: process.env.POSTGRES_HOST,
-  port: process.env.POSTGRES_PORT,
-  database: process.env.POSTGRES_DB,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  max: 20, // Increase from default 10
+  // host: process.env.POSTGRES_HOST,
+  // port: process.env.POSTGRES_PORT,
+  // database: process.env.POSTGRES_DB,
+  // user: process.env.POSTGRES_USER,
+  // password: process.env.POSTGRES_PASSWORD,
+  // max: 20, // Increase from default 10
+  // idleTimeoutMillis: 30000,
+  // connectionTimeoutMillis: 2000,
+  // statement_timeout: 2000
+
+  connectionString: process.env.DATABASE_URL,
+  max: 20,
+  ssl: {
+    rejectUnauthorized: false
+  },
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
   statement_timeout: 2000
@@ -16,8 +25,10 @@ const pool = new Pool({
 
 // Redis configuration
 const redisClient = Redis.createClient({
-  url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
-  password: process.env.REDIS_PASSWORD || undefined,
+  // url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+  // password: process.env.REDIS_PASSWORD || undefined,
+  url: process.env.REDIS_URL,
+
   socket: {
     reconnectStrategy: (retries) => {
       console.log(`Redis reconnect attempt: ${retries}`);
