@@ -4,513 +4,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Advanced URL Shortener with Analytics and Rate Limiting">
-    <title>URL Shortener - Shorten, Analyze & Explore Architecture</title>
-    <link rel="stylesheet" href="/styles.css">
+    <meta name="description" content="Elegant URL Shortener - Design & Utility">
+    <meta name="theme-color" content="#ebebeb">
+    <title>URL Shortener — Utility</title>
+
+    <!-- Design Principles: Playfair Display for headers, Inter/Harmond for body -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap"
+        rel="stylesheet">
+
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css" />
+    <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting-cells.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="/styles.css">
 </head>
 
-<body>
+<body class="smooth-scroll">
     <div class="app-container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="nav-wrapper container">
                 <div class="logo">
-                    <div class="logo-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                        </svg>
-                    </div>
-                    <span class="logo-text">URL Shortener</span>
+                    <span class="font-playfair">Shortener</span>
+                    <span class="version">Vol.1</span>
                 </div>
+
+                <div class="menu-links hide-mobile">
+                    <a href="#shorten" class="menu-link" data-splitting>Shorten</a>
+                    <a href="#stats" class="menu-link" data-splitting>Analytics</a>
+                    <a href="#arch" class="menu-link" data-splitting>Architecture</a>
+                </div>
+
                 <div class="auth-section">
-                    <div id="auth-loading" class="auth-loading">
-                        <div class="spinner"></div>
+                    <div id="auth-loading" class="auth-loading hidden">
+                        <span>Loading...</span>
                     </div>
                     <div id="auth-logged-out" class="auth-status hidden">
-                        <button id="login-btn" class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2">
-                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                                <polyline points="10 17 15 12 10 7"></polyline>
-                                <line x1="15" y1="12" x2="3" y2="12"></line>
-                            </svg>
-                            Login with Google
+                        <button id="login-btn" class="btn-text">
+                            Login
                         </button>
                     </div>
                     <div id="auth-logged-in" class="auth-status hidden">
-                        <div class="user-info">
-                            <img id="user-avatar" src="" alt="User" class="user-avatar">
-                            <span id="user-name" class="user-name"></span>
-                        </div>
-                        <button id="logout-btn" class="btn btn-secondary">Logout</button>
+                        <span id="user-name" class="user-name"></span>
+                        <button id="logout-btn" class="btn-text">Logout</button>
                     </div>
                 </div>
             </div>
-        </header>
-
-        <!-- Navigation Tabs -->
-        <nav class="tabs-nav">
-            <button class="tab-btn active" data-tab="shorten">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                </svg>
-                Shorten URL
-            </button>
-            <button class="tab-btn" data-tab="architecture">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="14" width="7" height="7"></rect>
-                    <rect x="3" y="14" width="7" height="7"></rect>
-                </svg>
-                Architecture
-            </button>
-            <button class="tab-btn" data-tab="analytics">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <line x1="18" y1="20" x2="18" y2="10"></line>
-                    <line x1="12" y1="20" x2="12" y2="4"></line>
-                    <line x1="6" y1="20" x2="6" y2="14"></line>
-                </svg>
-                Analytics
-            </button>
         </nav>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Shorten URL Tab -->
-            <section id="shorten-tab" class="tab-content active">
-                <div class="shorten-container">
-                    <div class="shorten-hero">
-                        <h1>Shorten Your Links</h1>
-                        <p>Create short, memorable links with powerful analytics</p>
-                    </div>
+        <main data-scroll-container>
+            <!-- Hero / Shorten Section -->
+            <section id="shorten" class="section hero-section">
+                <div class="container">
+                    <div class="hero-content">
+                        <h1 class="hero-title" data-splitting>
+                            <span class="font-playfair display-1">Shorten</span><br>
+                            <span class="font-playfair italic display-1">Your Links</span>
+                        </h1>
 
-                    <form id="shorten-form" class="shorten-form">
-                        <div class="input-group main-input">
-                            <label for="long-url">Enter your long URL</label>
-                            <input type="url" id="long-url" placeholder="https://example.com/your-very-long-url-here..."
-                                required>
-                        </div>
-
-                        <div class="options-toggle">
-                            <button type="button" id="toggle-options" class="btn btn-ghost">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                    <path
-                                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                                    </path>
-                                </svg>
-                                Advanced Options
-                            </button>
-                        </div>
-
-                        <div id="advanced-options" class="advanced-options hidden">
-                            <div class="options-grid">
-                                <div class="input-group">
-                                    <label for="custom-alias">Custom Alias (optional)</label>
-                                    <input type="text" id="custom-alias" placeholder="my-custom-link"
-                                        pattern="[a-zA-Z0-9-_]+" title="Only letters, numbers, hyphens and underscores">
+                        <div class="shorten-interface">
+                            <form id="shorten-form" class="minimal-form">
+                                <div class="input-line-group">
+                                    <input type="url" id="long-url" placeholder="Paste your long URL here" required
+                                        autocomplete="off">
+                                    <button type="submit" id="shorten-btn" class="btn-arrow">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M5 12H19" stroke="currentColor" stroke-width="1.5"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M12 5L19 12L12 19" stroke="currentColor" stroke-width="1.5"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </button>
                                 </div>
-                                <div class="input-group">
-                                    <label for="topic">Topic/Category (optional)</label>
-                                    <input type="text" id="topic" placeholder="marketing, social, etc.">
-                                </div>
-                                <div class="input-group">
-                                    <label for="expiration">Expiration</label>
-                                    <select id="expiration">
-                                        <option value="">Never</option>
-                                        <option value="1h">1 Hour</option>
-                                        <option value="24h">24 Hours</option>
-                                        <option value="7d">7 Days</option>
-                                        <option value="30d">30 Days</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+                                <div class="loader-line hidden"></div>
 
-                        <button type="submit" id="shorten-btn" class="btn btn-primary btn-large">
-                            <span class="btn-text">Shorten URL</span>
-                            <div class="btn-loader hidden">
-                                <div class="spinner"></div>
-                            </div>
-                        </button>
-                    </form>
+                                <div class="form-footer">
+                                    <button type="button" id="toggle-options" class="btn-link">
+                                        + Advanced Options
+                                    </button>
+                                </div>
 
-                    <div id="result-container" class="result-container hidden">
-                        <div class="result-card">
-                            <div class="result-header">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                </svg>
-                                <span>URL Shortened Successfully!</span>
-                            </div>
-                            <div class="result-url-group">
-                                <input type="text" id="short-url" readonly>
-                                <button type="button" id="copy-btn" class="btn btn-primary">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2">
-                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                    </svg>
-                                    Copy
-                                </button>
-                            </div>
-                            <div class="result-details">
-                                <span class="original-url" id="original-url"></span>
+                                <div id="advanced-options" class="advanced-panel hidden">
+                                    <div class="grid-2">
+                                        <div class="input-line-group">
+                                            <label>Alias</label>
+                                            <input type="text" id="custom-alias" placeholder="custom-name">
+                                        </div>
+                                        <div class="input-line-group">
+                                            <label>Topic</label>
+                                            <input type="text" id="topic" placeholder="marketing">
+                                        </div>
+                                        <div class="input-line-group">
+                                            <label>Expiration</label>
+                                            <select id="expiration">
+                                                <option value="">Never</option>
+                                                <option value="1h">1 Hour</option>
+                                                <option value="24h">24 Hours</option>
+                                                <option value="7d">7 Days</option>
+                                                <option value="30d">30 Days</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div id="result-container" class="result-display hidden">
+                                <div class="result-inner">
+                                    <span class="label">Your Short Link</span>
+                                    <div class="copy-row">
+                                        <input type="text" id="short-url" readonly>
+                                        <button id="copy-btn" class="btn-copy">Copy</button>
+                                    </div>
+                                    <span id="original-url" class="meta-url"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Architecture Tab -->
-            <section id="architecture-tab" class="tab-content">
-                <div class="architecture-container">
-                    <div class="architecture-header">
-                        <h2>System Architecture</h2>
-                        <p>A comprehensive overview of how the URL Shortener works</p>
+            <!-- Stats Section -->
+            <section id="stats" class="section stats-section">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-number">01</span>
+                        <h2 class="font-playfair">Analytics</h2>
                     </div>
 
-                    <!-- System Diagram -->
-                    <div class="architecture-diagram">
-                        <div class="diagram-row">
-                            <div class="arch-component client">
-                                <div class="component-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2">
-                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                                        <line x1="8" y1="21" x2="16" y2="21"></line>
-                                        <line x1="12" y1="17" x2="12" y2="21"></line>
-                                    </svg>
-                                </div>
-                                <h4>Client</h4>
-                                <p>Browser / User</p>
-                                <span class="tech-badge">HTML/CSS/JS</span>
-                            </div>
-
-                            <div class="flow-arrow">→</div>
-
-                            <div class="arch-component auth">
-                                <div class="component-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2">
-                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                                    </svg>
-                                </div>
-                                <h4>Google OAuth</h4>
-                                <p>Authentication</p>
-                                <span class="tech-badge">Passport.js</span>
-                            </div>
-
-                            <div class="flow-arrow">→</div>
-
-                            <div class="arch-component api">
-                                <div class="component-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2">
-                                        <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
-                                        <rect x="9" y="9" width="6" height="6"></rect>
-                                        <line x1="9" y1="1" x2="9" y2="4"></line>
-                                        <line x1="15" y1="1" x2="15" y2="4"></line>
-                                        <line x1="9" y1="20" x2="9" y2="23"></line>
-                                        <line x1="15" y1="20" x2="15" y2="23"></line>
-                                    </svg>
-                                </div>
-                                <h4>Node.js API</h4>
-                                <p>Express.js Server</p>
-                                <span class="tech-badge">REST API</span>
-                            </div>
+                    <div class="stats-overview">
+                        <div class="stat-item">
+                            <span class="stat-label">Total URLs</span>
+                            <span class="stat-number display-2" id="total-urls">0</span>
                         </div>
-
-                        <div class="diagram-row storage-row">
-                            <div class="arch-component cache">
-                                <div class="component-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2">
-                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                                    </svg>
-                                </div>
-                                <h4>Redis</h4>
-                                <p>Session & Cache</p>
-                                <span class="tech-badge">Upstash</span>
-                            </div>
-
-                            <div class="arch-component database">
-                                <div class="component-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2">
-                                        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-                                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-                                    </svg>
-                                </div>
-                                <h4>PostgreSQL</h4>
-                                <p>Primary Database</p>
-                                <span class="tech-badge">Neon.tech</span>
-                            </div>
-
-                            <div class="arch-component hosting">
-                                <div class="component-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2">
-                                        <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-                                        <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
-                                        <line x1="6" y1="6" x2="6.01" y2="6"></line>
-                                        <line x1="6" y1="18" x2="6.01" y2="18"></line>
-                                    </svg>
-                                </div>
-                                <h4>Render</h4>
-                                <p>Cloud Hosting</p>
-                                <span class="tech-badge">Docker</span>
-                            </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Clicks</span>
+                            <span class="stat-number display-2" id="total-clicks">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Locations</span>
+                            <span class="stat-number display-2" id="unique-locations">0</span>
                         </div>
                     </div>
 
-                    <!-- Data Flow Section -->
-                    <div class="flow-section">
-                        <h3>How URL Shortening Works</h3>
-                        <div class="flow-steps">
-                            <div class="flow-step">
-                                <div class="step-number">1</div>
-                                <div class="step-content">
-                                    <h4>User Authentication</h4>
-                                    <p>User logs in via Google OAuth 2.0. Session is stored in Redis for persistence.
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="flow-step">
-                                <div class="step-number">2</div>
-                                <div class="step-content">
-                                    <h4>URL Submission</h4>
-                                    <p>Long URL is validated and sent to the API. Rate limiting prevents abuse.</p>
-                                </div>
-                            </div>
-                            <div class="flow-step">
-                                <div class="step-number">3</div>
-                                <div class="step-content">
-                                    <h4>Alias Generation</h4>
-                                    <p>Unique short alias is generated (or custom alias validated). Data stored in
-                                        PostgreSQL.</p>
-                                </div>
-                            </div>
-                            <div class="flow-step">
-                                <div class="step-number">4</div>
-                                <div class="step-content">
-                                    <h4>Redirect & Track</h4>
-                                    <p>When short URL is visited, user is redirected. Analytics captured: IP, device,
-                                        location.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tech Stack Grid -->
-                    <div class="tech-stack-section">
-                        <h3>Technology Stack</h3>
-                        <div class="tech-grid">
-                            <div class="tech-card">
-                                <div class="tech-icon backend">⚡</div>
-                                <h4>Backend</h4>
-                                <ul>
-                                    <li>Node.js</li>
-                                    <li>Express.js</li>
-                                    <li>Passport.js</li>
-                                    <li>JWT Tokens</li>
-                                </ul>
-                            </div>
-                            <div class="tech-card">
-                                <div class="tech-icon database">🗄️</div>
-                                <h4>Database</h4>
-                                <ul>
-                                    <li>PostgreSQL</li>
-                                    <li>Redis Cache</li>
-                                    <li>Session Store</li>
-                                    <li>Token Blacklist</li>
-                                </ul>
-                            </div>
-                            <div class="tech-card">
-                                <div class="tech-icon security">🔒</div>
-                                <h4>Security</h4>
-                                <ul>
-                                    <li>Google OAuth 2.0</li>
-                                    <li>Rate Limiting</li>
-                                    <li>Helmet.js</li>
-                                    <li>CORS Protection</li>
-                                </ul>
-                            </div>
-                            <div class="tech-card">
-                                <div class="tech-icon analytics">📊</div>
-                                <h4>Analytics</h4>
-                                <ul>
-                                    <li>Click Tracking</li>
-                                    <li>Geo Location</li>
-                                    <li>Device Detection</li>
-                                    <li>Chart.js Graphs</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Key Features -->
-                    <div class="features-section">
-                        <h3>Key Features</h3>
-                        <div class="features-grid">
-                            <div class="feature-card">
-                                <div class="feature-icon">🚀</div>
-                                <h4>High Performance</h4>
-                                <p>Redis caching for fast redirects. Sub-100ms response times.</p>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">📈</div>
-                                <h4>Rich Analytics</h4>
-                                <p>Track clicks, devices, locations, and trends over time.</p>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">🔐</div>
-                                <h4>Secure Auth</h4>
-                                <p>Google OAuth with JWT tokens and session management.</p>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">🛡️</div>
-                                <h4>Rate Limiting</h4>
-                                <p>Token bucket algorithm prevents API abuse.</p>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">🎨</div>
-                                <h4>Custom Aliases</h4>
-                                <p>Create memorable branded short links.</p>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">☁️</div>
-                                <h4>Cloud Native</h4>
-                                <p>Dockerized and deployed on Render with auto-scaling.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- API Documentation Link -->
-                    <div class="api-docs-section">
-                        <div class="api-docs-card">
-                            <div class="api-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                                    <polyline points="10 9 9 9 8 9"></polyline>
-                                </svg>
-                            </div>
-                            <div class="api-docs-content">
-                                <h4>API Documentation</h4>
-                                <p>Explore the complete REST API with Swagger UI</p>
-                                <a href="/api-docs" target="_blank" class="btn btn-primary">View API Docs →</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Analytics Tab -->
-            <section id="analytics-tab" class="tab-content">
-                <div class="analytics-container">
-                    <div class="analytics-header">
-                        <h2>Analytics Dashboard</h2>
-                        <button id="refresh-analytics" class="btn btn-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2">
-                                <polyline points="23 4 23 10 17 10"></polyline>
-                                <polyline points="1 20 1 14 7 14"></polyline>
-                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                            </svg>
-                            Refresh
-                        </button>
-                    </div>
-
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                                </svg>
-                            </div>
-                            <div class="stat-content">
-                                <span class="stat-value" id="total-urls">--</span>
-                                <span class="stat-label">Total URLs</span>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon clicks">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                                </svg>
-                            </div>
-                            <div class="stat-content">
-                                <span class="stat-value" id="total-clicks">--</span>
-                                <span class="stat-label">Total Clicks</span>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon locations">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <line x1="2" y1="12" x2="22" y2="12"></line>
-                                    <path
-                                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
-                                    </path>
-                                </svg>
-                            </div>
-                            <div class="stat-content">
-                                <span class="stat-value" id="unique-locations">--</span>
-                                <span class="stat-label">Unique Locations</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="charts-grid">
-                        <div class="chart-card">
-                            <h3>Clicks Over Time</h3>
+                    <div class="charts-wrap">
+                        <div class="chart-box">
+                            <h3>Performance</h3>
                             <canvas id="clicks-chart"></canvas>
                         </div>
-                        <div class="chart-card">
-                            <h3>Device Types</h3>
+                        <div class="chart-box">
+                            <h3>Devices</h3>
                             <canvas id="devices-chart"></canvas>
                         </div>
                     </div>
 
-                    <div class="top-urls-section">
-                        <h3>Top Performing URLs</h3>
-                        <div class="table-container">
+                    <div class="top-list">
+                        <h3>Top 5 Links</h3>
+                        <div class="table-minimal">
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>Short URL</th>
-                                        <th>Original URL</th>
+                                        <th>Short</th>
+                                        <th>Origin</th>
                                         <th>Clicks</th>
-                                        <th>Created</th>
+                                        <th>Date</th>
                                     </tr>
                                 </thead>
                                 <tbody id="top-urls-body">
                                     <tr>
-                                        <td colspan="4" class="empty-state">No data available. Create some short URLs
-                                            first!</td>
+                                        <td colspan="4" class="text-center">No data available</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -518,12 +184,72 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Architecture Section -->
+            <section id="arch" class="section arch-section">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-number">02</span>
+                        <h2 class="font-playfair">Architecture</h2>
+                    </div>
+
+                    <div class="arch-grid">
+                        <div class="arch-node">
+                            <h4>Client</h4>
+                            <p>HTML/JS</p>
+                        </div>
+                        <div class="arch-line"></div>
+                        <div class="arch-node">
+                            <h4>API</h4>
+                            <p>Node/Express</p>
+                        </div>
+                        <div class="arch-line"></div>
+                        <div class="arch-node">
+                            <h4>Store</h4>
+                            <p>Postgres/Redis</p>
+                        </div>
+                    </div>
+
+                    <div class="tech-list">
+                        <div class="tech-item">
+                            <span>Backend</span>
+                            <span>Node.js, Express, Passport</span>
+                        </div>
+                        <div class="tech-item">
+                            <span>Database</span>
+                            <span>PostgreSQL, Redis</span>
+                        </div>
+                        <div class="tech-item">
+                            <span>DevOps</span>
+                            <span>Docker, Render</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="footer">
+                <div class="container">
+                    <div class="footer-inner">
+                        <div class="footer-left">
+                            <p>URL Shortener Utility</p>
+                        </div>
+                        <div class="footer-right">
+                            <a href="/api-docs">API Documentation</a>
+                            <span>&copy; 2026</span>
+                        </div>
+                    </div>
+                </div>
+            </footer>
         </main>
 
-        <!-- Toast Notifications -->
+        <!-- Toast -->
         <div id="toast-container" class="toast-container"></div>
     </div>
 
+    <!-- Scripts -->
+    <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/ScrollTrigger.min.js"></script>
     <script src="/app.js"></script>
 </body>
 

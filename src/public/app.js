@@ -13,12 +13,7 @@ const elements = {
     authLoggedIn: document.getElementById('auth-logged-in'),
     loginBtn: document.getElementById('login-btn'),
     logoutBtn: document.getElementById('logout-btn'),
-    userAvatar: document.getElementById('user-avatar'),
     userName: document.getElementById('user-name'),
-
-    // Tabs
-    tabBtns: document.querySelectorAll('.tab-btn'),
-    tabContents: document.querySelectorAll('.tab-content'),
 
     // Shorten Form
     shortenForm: document.getElementById('shorten-form'),
@@ -33,7 +28,6 @@ const elements = {
     shortUrlInput: document.getElementById('short-url'),
     copyBtn: document.getElementById('copy-btn'),
     originalUrl: document.getElementById('original-url'),
-
 
     // Analytics
     refreshAnalytics: document.getElementById('refresh-analytics'),
@@ -56,11 +50,60 @@ let devicesChart = null;
    ======================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
-    initTabs();
+    initVisuals();
     initShortenForm();
     initAnalytics();
     checkAuthStatus();
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
 });
+
+function initVisuals() {
+    // Splitting.js for text animations
+    if (window.Splitting) {
+        Splitting();
+    }
+
+    // GSAP ScrollTrigger
+    if (window.gsap && window.ScrollTrigger) {
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Reveal sections
+        gsap.utils.toArray('.section').forEach(section => {
+            gsap.fromTo(section,
+                { opacity: 0, y: 50 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 80%"
+                    }
+                }
+            );
+        });
+
+        // Reveal header text
+        gsap.from(".hero-title .char", {
+            duration: 1,
+            y: 100,
+            opacity: 0,
+            stagger: 0.02,
+            ease: "circ.out",
+            delay: 0.5
+        });
+    }
+}
 
 /* ========================================
    Authentication
@@ -73,12 +116,13 @@ async function checkAuthStatus() {
         });
 
         const data = await response.json();
-
         elements.authLoading.classList.add('hidden');
 
         if (data.authenticated && data.user) {
             currentUser = data.user;
             showLoggedInState();
+            // Load analytics automatically when logged in
+            loadAnalyticsData();
         } else {
             showLoggedOutState();
         }
@@ -94,7 +138,6 @@ function showLoggedInState() {
     elements.authLoggedIn.classList.remove('hidden');
 
     if (currentUser) {
-        elements.userAvatar.src = currentUser.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.name || 'User');
         elements.userName.textContent = currentUser.name || currentUser.email || 'User';
     }
 }
@@ -117,42 +160,12 @@ elements.logoutBtn?.addEventListener('click', async () => {
         });
         currentUser = null;
         showLoggedOutState();
-        showToast('Logged out successfully', 'success');
+        showToast('Logged out');
     } catch (error) {
         console.error('Logout failed:', error);
         showToast('Logout failed', 'error');
     }
 });
-
-/* ========================================
-   Tab Navigation
-   ======================================== */
-
-function initTabs() {
-    elements.tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabId = btn.dataset.tab;
-            switchTab(tabId);
-        });
-    });
-}
-
-function switchTab(tabId) {
-    // Update buttons
-    elements.tabBtns.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tabId);
-    });
-
-    // Update content
-    elements.tabContents.forEach(content => {
-        content.classList.toggle('active', content.id === `${tabId}-tab`);
-    });
-
-    // Load analytics data when switching to analytics tab
-    if (tabId === 'analytics') {
-        loadAnalyticsData();
-    }
-}
 
 /* ========================================
    Shorten URL Form
@@ -162,6 +175,9 @@ function initShortenForm() {
     // Toggle advanced options
     elements.toggleOptions?.addEventListener('click', () => {
         elements.advancedOptions.classList.toggle('hidden');
+        elements.toggleOptions.textContent = elements.advancedOptions.classList.contains('hidden')
+            ? '+ Advanced Options'
+            : '- Hide Options';
     });
 
     // Form submission
@@ -180,23 +196,20 @@ async function handleShortenSubmit(e) {
     }
 
     const longUrl = elements.longUrlInput.value.trim();
-
     if (!longUrl) {
         showToast('Please enter a valid URL', 'error');
         return;
     }
 
-    // Show loading state
-    const btnText = elements.shortenBtn.querySelector('.btn-text');
-    const btnLoader = elements.shortenBtn.querySelector('.btn-loader');
-    btnText.classList.add('hidden');
-    btnLoader.classList.remove('hidden');
-    elements.shortenBtn.disabled = true;
+    // Loading state
+    const btnIcon = elements.shortenBtn.querySelector('svg');
+    const loaderLine = document.querySelector('.loader-line');
+
+    // elements.shortenBtn.disabled = true;
+    loaderLine.classList.remove('hidden');
 
     try {
-        const payload = {
-            longUrl: longUrl
-        };
+        const payload = { longUrl: longUrl };
 
         // Add optional fields
         const customAlias = elements.customAlias.value.trim();
@@ -206,7 +219,6 @@ async function handleShortenSubmit(e) {
         if (customAlias) payload.customAlias = customAlias;
         if (topic) payload.topic = topic;
         if (expiration) {
-            // Convert expiration to date
             const now = new Date();
             switch (expiration) {
                 case '1h': now.setHours(now.getHours() + 1); break;
@@ -219,9 +231,7 @@ async function handleShortenSubmit(e) {
 
         const response = await fetch(`${API_BASE}/api/shorten`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify(payload)
         });
@@ -233,91 +243,69 @@ async function handleShortenSubmit(e) {
         }
 
         // Show result
-        const shortUrl = data.shortUrl || `${API_BASE}/api/shorten/${data.alias}`;
+        const shortUrl = data.shortUrl || `${API_BASE}/${data.alias}`;
         elements.shortUrlInput.value = shortUrl;
         elements.originalUrl.textContent = longUrl;
+
         elements.resultContainer.classList.remove('hidden');
+
+        // Animate result
+        if (window.gsap) {
+            gsap.from(elements.resultContainer, {
+                y: 20, opacity: 0, duration: 0.5
+            });
+        }
 
         // Clear form
         elements.longUrlInput.value = '';
         elements.customAlias.value = '';
-        elements.topic.value = '';
-        elements.expiration.value = '';
 
-        showToast('URL shortened successfully!', 'success');
+        // Refresh analytics if visible
+        loadAnalyticsData();
 
     } catch (error) {
         console.error('Shorten failed:', error);
         showToast(error.message || 'Failed to shorten URL', 'error');
     } finally {
-        // Reset button state
-        btnText.classList.remove('hidden');
-        btnLoader.classList.add('hidden');
+        loaderLine.classList.add('hidden');
         elements.shortenBtn.disabled = false;
     }
 }
 
 async function handleCopy() {
     const url = elements.shortUrlInput.value;
-
     try {
         await navigator.clipboard.writeText(url);
-
-        // Update button temporarily
-        const originalContent = elements.copyBtn.innerHTML;
-        elements.copyBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            Copied!
-        `;
-
-        setTimeout(() => {
-            elements.copyBtn.innerHTML = originalContent;
-        }, 2000);
-
-        showToast('URL copied to clipboard!', 'success');
+        const originalText = elements.copyBtn.textContent;
+        elements.copyBtn.textContent = 'Copied';
+        setTimeout(() => elements.copyBtn.textContent = originalText, 2000);
     } catch (error) {
-        showToast('Failed to copy URL', 'error');
+        showToast('Failed to copy', 'error');
     }
 }
-
 
 /* ========================================
    Analytics Dashboard
    ======================================== */
 
 function initAnalytics() {
-    elements.refreshAnalytics?.addEventListener('click', loadAnalyticsData);
-
-    // Initialize charts
     initCharts();
 }
 
 function initCharts() {
-    const chartOptions = {
+    const commonOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: {
-                labels: {
-                    color: '#a0a0b0'
-                }
-            }
+            legend: { display: false }
         },
         scales: {
-            x: {
-                grid: { color: 'rgba(255,255,255,0.05)' },
-                ticks: { color: '#6b6b7b' }
-            },
-            y: {
-                grid: { color: 'rgba(255,255,255,0.05)' },
-                ticks: { color: '#6b6b7b' }
-            }
+            x: { grid: { display: false }, ticks: { font: { family: 'Inter' } } },
+            y: { grid: { color: '#eee' }, ticks: { font: { family: 'Inter' } } }
         }
     };
 
-    // Clicks chart
+    // Clicks chart (Monochrome)
     const clicksCtx = document.getElementById('clicks-chart')?.getContext('2d');
     if (clicksCtx) {
         clicksChart = new Chart(clicksCtx, {
@@ -327,17 +315,20 @@ function initCharts() {
                 datasets: [{
                     label: 'Clicks',
                     data: [],
-                    borderColor: '#6366f1',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    borderColor: '#1a1a1a', // Black
+                    borderWidth: 2,
+                    backgroundColor: 'rgba(0,0,0,0.05)',
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 4
                 }]
             },
-            options: chartOptions
+            options: commonOptions
         });
     }
 
-    // Devices chart
+    // Devices chart (Grayscale)
     const devicesCtx = document.getElementById('devices-chart')?.getContext('2d');
     if (devicesCtx) {
         devicesChart = new Chart(devicesCtx, {
@@ -347,10 +338,10 @@ function initCharts() {
                 datasets: [{
                     data: [0, 0, 0, 0],
                     backgroundColor: [
-                        '#6366f1',
-                        '#8b5cf6',
-                        '#ec4899',
-                        '#6b6b7b'
+                        '#1a1a1a', // Black
+                        '#666666', // Dark Grey
+                        '#999999', // Medium Grey
+                        '#d4d4d4'  // Light Grey
                     ],
                     borderWidth: 0
                 }]
@@ -358,10 +349,14 @@ function initCharts() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                cutout: '70%',
                 plugins: {
                     legend: {
-                        position: 'bottom',
-                        labels: { color: '#a0a0b0' }
+                        position: 'right',
+                        labels: {
+                            font: { family: 'Inter' },
+                            boxWidth: 10
+                        }
                     }
                 }
             }
@@ -370,35 +365,29 @@ function initCharts() {
 }
 
 async function loadAnalyticsData() {
-    if (!currentUser) {
-        showToast('Please login to view analytics', 'error');
-        return;
-    }
+    if (!currentUser) return;
 
     try {
         const response = await fetch(`${API_BASE}/api/analytics/overall`, {
             credentials: 'include'
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch analytics');
-        }
+        if (!response.ok) return; // Silent fail if just background refresh
 
         const data = await response.json();
 
-        // Update stats
-        elements.totalUrls.textContent = data.totalUrls || 0;
-        elements.totalClicks.textContent = data.totalClicks || 0;
-        elements.uniqueLocations.textContent = data.uniqueLocations || 0;
+        // Update numbers with animation
+        animateValue(elements.totalUrls, data.totalUrls || 0);
+        animateValue(elements.totalClicks, data.totalClicks || 0);
+        animateValue(elements.uniqueLocations, data.uniqueLocations || 0);
 
-        // Update clicks chart
+        // Update charts
         if (clicksChart && data.clicksOverTime) {
             clicksChart.data.labels = data.clicksOverTime.map(d => d.date);
             clicksChart.data.datasets[0].data = data.clicksOverTime.map(d => d.count);
             clicksChart.update();
         }
 
-        // Update devices chart
         if (devicesChart && data.deviceTypes) {
             devicesChart.data.datasets[0].data = [
                 data.deviceTypes.desktop || 0,
@@ -409,66 +398,80 @@ async function loadAnalyticsData() {
             devicesChart.update();
         }
 
-        // Update top URLs table
+        // Update Table
         if (data.topUrls && data.topUrls.length > 0) {
             elements.topUrlsBody.innerHTML = data.topUrls.map(url => `
                 <tr>
-                    <td><a href="${API_BASE}/api/shorten/${url.alias}" target="_blank">${url.alias}</a></td>
-                    <td class="original-url">${truncateUrl(url.originalUrl, 50)}</td>
+                    <td><a href="${API_BASE}/${url.alias}" target="_blank" style="text-decoration:underline">${url.alias}</a></td>
+                    <td style="color:#666">${new URL(url.originalUrl).hostname}</td>
                     <td>${url.clicks}</td>
-                    <td>${formatDate(url.createdAt)}</td>
+                    <td style="color:#666">${new Date(url.createdAt).toLocaleDateString()}</td>
                 </tr>
             `).join('');
         }
 
     } catch (error) {
-        console.error('Analytics fetch failed:', error);
-        showToast('Failed to load analytics', 'error');
+        console.error('Analytics error:', error);
     }
 }
 
+// Helper to animate numbers
+function animateValue(obj, end, duration = 1000) {
+    let startTimestamp = null;
+    const start = parseInt(obj.innerHTML) || 0;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
 /* ========================================
-   Utility Functions
+   Toast System
    ======================================== */
 
-function showToast(message, type = 'success') {
+function showToast(message, type = 'normal') {
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: #1a1a1a;
+        color: #fff;
+        padding: 1rem 2rem;
+        border-radius: 4px;
+        z-index: 9999;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        animation: slideIn 0.3s ease-out forwards;
+    `;
 
-    const icon = type === 'success'
-        ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
-        : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+    if (type === 'error') {
+        toast.style.background = '#000'; // Keep it monochrome but maybe distinct border
+        toast.style.borderLeft = '3px solid #666';
+    }
 
-    toast.innerHTML = `${icon}<span>${message}</span>`;
-
+    toast.textContent = message;
     elements.toastContainer.appendChild(toast);
 
-    // Auto remove after 4 seconds
     setTimeout(() => {
-        toast.style.animation = 'slideOutRight 0.3s ease forwards';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
         setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    }, 3000);
 }
 
-function truncateUrl(url, maxLength) {
-    if (url.length <= maxLength) return url;
-    return url.substring(0, maxLength) + '...';
-}
-
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-    });
-}
-
-// Add CSS for toast exit animation
+// Inject keyframes for toast
 const style = document.createElement('style');
 style.textContent = `
-    @keyframes slideOutRight {
-        to { opacity: 0; transform: translateX(100%); }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 `;
 document.head.appendChild(style);
